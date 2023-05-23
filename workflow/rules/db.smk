@@ -46,13 +46,15 @@ rule build_kraken_database:
 
 rule build_decontamination_db:
     output:
-        fasta=RESULTS / "db/remove_contam.fa.gz",
-        metadata=RESULTS / "db/remove_contam.tsv",
+        fasta=temp(RESULTS / "db/remove_contam.fa.gz"),
+        metadata=temp(RESULTS / "db/remove_contam.tsv"),
+    resources:
+        runtime="90m",
     params:
         script=SCRIPTS / "download_tb_reference_files.pl",
         outdir=lambda wildcards, output: Path(output.fasta).parent,
     container:
-        CONTAINERS["clockwork"]
+        CONTAINERS["tb_decontam"]
     log:
         LOGS / "build_decontamination_db.log",
     shadow:
