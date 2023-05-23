@@ -14,7 +14,7 @@ def main():
     add_metadata = []
 
     # add ancestral genome
-    is_contam = 0
+    is_contam = "0"
     group = "TB"
     with gzip.open(snakemake.input.ancestral, "rt") as f_in:
         for line in map(str.rstrip, f_in):
