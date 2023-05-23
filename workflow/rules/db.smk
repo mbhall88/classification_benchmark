@@ -44,11 +44,10 @@ rule build_kraken_database:
         "kraken2-build {params.opts} {params.max_db_size} {params.spaces} --threads {threads} --db {output.db} &> {log}"
 
 
-
 rule build_decontamination_db:
     output:
-        fasta=RESOURCES / "decontamination/remove_contam.fa.gz",
-        metadata=RESOURCES / "decontamination/remove_contam.tsv",
+        fasta=RESULTS / "db/remove_contam.fa.gz",
+        metadata=RESULTS / "db/remove_contam.tsv",
     params:
         script=SCRIPTS / "download_tb_reference_files.pl",
         outdir=lambda wildcards, output: Path(output.fasta).parent,
@@ -60,3 +59,84 @@ rule build_decontamination_db:
         "shallow"
     shell:
         "perl {params.script} {params.outdir} &> {log}"
+
+
+rule download_ancestral_genome:
+    output:
+        asm=RESULTS / "db/mtb_ancestor.fa.gz",
+    log:
+        LOGS / "download_ancestral_genome.log",
+    resources:
+        mem_mb=int(0.5 * GB),
+        runtime="3m",
+    params:
+        url=config["ancestral_genome"]["url"],
+        md5=config["ancestral_genome"]["md5"],
+    container:
+        CONTAINERS["base"]
+    shadow:
+        "shallow"
+    shell:
+        """
+        wget -O asm.fa {params.url} 2> {log}
+        hash=$(md5sum asm.fa | cut -d' ' -f1)
+        if [ "$hash" != {params.md5} ]; then
+          echo "MD5 does not match" >> {log}
+          exit 1
+        fi
+        gzip -c asm.fa > {output.asm} 2>> {log} 
+        """
+
+
+rule download_mtb_lineage_refs:
+    output:
+        asms=expand(str(RESULTS / "db/{sample}.fasta.gz", sample=GRAMTOOLS_SAMPLES)),
+    log:
+        LOGS / "download_mtb_lineage_refs.log",
+    resources:
+        mem_mb=int(0.5 * GB),
+        runtime="5m",
+    params:
+        url=config["mtb_gramtools"]["url"],
+        md5=config["mtb_gramtools"]["md5"],
+        parent=lambda wildcards, output: Path(output.asms[0]).parent,
+    container:
+        CONTAINERS["base"]
+    shadow:
+        "shallow"
+    shell:
+        """
+        exec 2> {log}
+        wget -O mtb_asms.tar {params.url}
+        hash=$(md5sum mtb_asms.tar | cut -d' ' -f1)
+        if [ "$hash" != {params.md5} ]; then
+          echo "MD5 does not match" >> {log}
+          exit 1
+        fi
+        tar xf mtb_asms.tar
+        cd analysis/input_data/mtuberculosis/pacb_ilmn/pacb_assemblies || exit 1
+        for f in *.fasta.gz;
+        do
+            dst={params.parent}/$f
+            mv $f $dst
+        done
+        """
+
+
+rule combine_references:
+    input:
+        decontam_fa=rules.build_decontamination_db.output.fasta,
+        decontam_metadata=rules.build_decontamination_db.output.metadata,
+        ancestral=rules.download_ancestral_genome.output.asm,
+        gramtools_asms=rules.download_mtb_lineage_refs.output.asms,
+    output:
+        fasta=RESULTS / "db/db.fa.gz",
+        metadata=RESULTS / "db/db.tsv",
+    log:
+        LOGS / "combine_references.log",
+    resources:
+        runtime="10m",
+    container:
+        CONTAINERS["python"]
+    script:
+        SCRIPTS / "combine.references.py"

@@ -1,3 +1,4 @@
+import pandas as pd
 from pathlib import Path
 
 
@@ -15,12 +16,17 @@ CONTAINERS = config["containers"]
 RESOURCES = Path("resources").resolve()
 GB = 1_000
 
+gramtools_lineages = pd.read_csv(config["gramtools_lineages"])
+GRAMTOOLS_SAMPLES = sorted(list(gramtools_lineages["identifier"]))
+
 target_files = set()
 for size in config["kraken_db_size"]:
     for d in config["kraken_wl_sizes"]:
         k = d["k"]
         l = d["l"]
         target_files.add(RESULTS / f"kraken/db/k{k}/l{l}/{size}")
+
+target_files.add(RESULTS / "db/db.fa.gz")
 
 
 localrules:

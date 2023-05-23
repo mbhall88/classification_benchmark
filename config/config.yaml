@@ -12,3 +12,16 @@ kraken_db_size:
 
 containers:
   kraken: "docker://quay.io/biocontainers/kraken2:2.1.2--pl5321h4ac6f70_4"
+  clockwork: "docker://quay.io/mbhall88/clockwork:fe62f00"
+  base: "docker://bash:5.1"
+  python: "docker://python:3.10.4-slim-bullseye"
+
+ancestral_genome:
+  url: "https://zenodo.org/record/3497110/files/MTB_ancestor_reference.fasta"
+  md5: "4814ac17284bca12f95ad2c77daed4e5"
+
+mtb_gramtools:
+  url: "https://zenodo.org/record/5075458/files/4_mtb_validation_assemblies.tar"
+  md5: "658fcdd15c4364c4111cb89d15b24c50"
+
+gramtools_lineages: "config/mtb_gramtools_lineages.csv"
