@@ -90,7 +90,7 @@ rule download_ancestral_genome:
 
 rule download_mtb_lineage_refs:
     output:
-        asms=expand(str(RESULTS / "db/{sample}.fasta.gz", sample=GRAMTOOLS_SAMPLES)),
+        asms=expand(str(RESULTS / "db/{sample}.fasta.gz"), sample=GRAMTOOLS_SAMPLES)),
     log:
         LOGS / "download_mtb_lineage_refs.log",
     resources:
