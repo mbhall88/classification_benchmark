@@ -32,4 +32,4 @@ rule all:
         target_files,
 
 
-include: RULES / "kraken.smk"
+include: RULES / "db.smk"
