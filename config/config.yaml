@@ -1,0 +1,14 @@
+kraken_wl_sizes:
+  - k: 21
+    l: 14
+  - k: 27
+    l: 18
+  - k: 35
+    l: 31
+
+kraken_db_size:
+  - "full"
+  - "10gb"
+
+containers:
+  kraken: "docker://quay.io/biocontainers/kraken2:2.1.2--pl5321h4ac6f70_4"

@@ -1,0 +1,35 @@
+from pathlib import Path
+
+
+configfile: "config/config.yaml"
+
+
+WORKFLOW = Path("workflow").resolve()
+RULES = WORKFLOW / "rules"
+ENVS = WORKFLOW / "envs"
+SCRIPTS = WORKFLOW / "scripts"
+RESULTS = Path("results").resolve()
+BENCH = RESULTS / "benchmark"
+LOGS = Path("logs/rules").resolve()
+CONTAINERS = config["containers"]
+RESOURCES = Path("resources").resolve()
+GB = 1_000
+
+target_files = set()
+for size in config["kraken_db_size"]:
+    for d in config["kraken_wl_sizes"]:
+        k = d["k"]
+        l = d["l"]
+        target_files.add(RESULTS / f"kraken/db/k{k}/l{l}/{size}")
+
+
+localrules:
+    all,
+
+
+rule all:
+    input:
+        target_files,
+
+
+include: RULES / "kraken.smk"
