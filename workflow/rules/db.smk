@@ -35,7 +35,7 @@ rule build_kraken_database:
     benchmark:
         BENCH / "kraken/build/k{k}/l{l}/{size}.tsv"
     params:
-        opts="--standard --kmer-len {k} --minimizer-len {l}",
+        opts="--standard --kmer-len {k} --minimizer-len {l} --use-ftp",
         max_db_size=infer_max_db_size_opt,
         spaces=infer_minimizer_spaces,
     container:
@@ -141,4 +141,4 @@ rule combine_references:
     container:
         CONTAINERS["python"]
     script:
-        SCRIPTS / "combine.references.py"
+        SCRIPTS / "combine_references.py"
