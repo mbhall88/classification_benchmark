@@ -31,6 +31,7 @@ rule build_kraken_database:
     threads: 16
     resources:
         mem_mb=infer_kraken_memory,
+        runtime="1d",
     benchmark:
         BENCH / "kraken/build/k{k}/l{l}/{size}.tsv"
     params:
