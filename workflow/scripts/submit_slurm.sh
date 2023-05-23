@@ -11,7 +11,7 @@ if [[ ! -d "$LOG_DIR" ]]; then
     exit 1
 fi
 
-MEMORY="12G"
+MEMORY="2G"
 TIME="1d12h"
 THREADS=2
 PROFILE="slurm.punim1703"
