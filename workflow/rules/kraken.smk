@@ -17,6 +17,12 @@ def infer_max_db_size_opt(wildcards):
         return f"--max-db-size {parse_size(wildcards.size)}"
 
 
+def infer_minimizer_spaces(wildcards):
+    l = int(wildcards.l)
+    s = int(l / 4)
+    return f"--minimizer-spaces {s}"
+
+
 rule build_kraken_database:
     output:
         db=directory(RESULTS / "kraken/db/k{k}/l{l}/{size}"),
@@ -30,7 +36,8 @@ rule build_kraken_database:
     params:
         opts="--standard --kmer-len {k} --minimizer-len {l}",
         max_db_size=infer_max_db_size_opt,
+        spaces=infer_minimizer_spaces,
     container:
         CONTAINERS["kraken"]
     shell:
-        "kraken2-build {params.opts} {params.max_db_size} --threads {threads} --db {output.db} &> {log}"
+        "kraken2-build {params.opts} {params.max_db_size} {params.spaces} --threads {threads} --db {output.db} &> {log}"
