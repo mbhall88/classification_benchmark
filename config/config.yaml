@@ -11,7 +11,7 @@ kraken_db_size:
   - "10gb"
 
 containers:
-  kraken: "docker://quay.io/biocontainers/kraken2:2.1.2--pl5321h4ac6f70_4"
+  kraken: "docker://quay.io/mbhall88/kraken2:84e851b"
   tb_decontam: "docker://quay.io/mbhall88/tb-decontam:0.1.1"
   base: "docker://bash:5.1"
   python: "docker://python:3.10.4-slim-bullseye"
