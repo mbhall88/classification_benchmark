@@ -15,6 +15,8 @@ containers:
   tb_decontam: "docker://quay.io/mbhall88/tb-decontam:0.1.1"
   base: "docker://bash:5.1"
   python: "docker://python:3.10.4-slim-bullseye"
+  spumoni: "docker://quay.io/mbhall88/spumoni:2.0.7"
+  minimap2: "docker://quay.io/biocontainers/minimap2:2.26--he4a0461_1"
 
 ancestral_genome:
   url: "https://zenodo.org/record/3497110/files/MTB_ancestor_reference.fasta"

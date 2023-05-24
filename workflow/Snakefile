@@ -27,6 +27,7 @@ for size in config["kraken_db_size"]:
         target_files.add(RESULTS / f"kraken/db/k{k}/l{l}/{size}")
 
 target_files.add(RESULTS / "db/db.fa.gz")
+target_files.add(RESULTS / "spumoni/db/db.ms")
 
 
 localrules:

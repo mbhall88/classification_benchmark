@@ -142,3 +142,62 @@ rule combine_references:
         CONTAINERS["python"]
     script:
         SCRIPTS / "combine_references.py"
+
+
+rule index_db_with_minimap2:
+    input:
+        fasta=rules.combine_references.output.fasta,
+    output:
+        index=RESULTS / "db/db.fa.gz.map-ont.mmi",
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * int(32 * GB),
+        runtime="5m",
+    log:
+        LOGS / "index_decontam_db_with_minimap2.log",
+    threads: 4
+    container:
+        CONTAINERS["minimap2"]
+    params:
+        opts="-x map-ont -I 12G --idx-no-seq",
+    shell:
+        "minimap2 {params.opts} -t {threads} -d {output.index} {input.fasta} 2> {log}"
+
+
+rule prepare_spumoni_index:
+    input:
+        fasta=rules.combine_references.output.fasta,
+        metadata=rules.combine_references.output.metadata,
+    output:
+        file_list=RESULTS / "spumoni/db/file_list.txt",
+        fasta_dir=temp(directory(RESULTS / "spumoni/db/individual_fastas")),
+    log:
+        LOGS / "prepare_spumoni_index.log",
+    resources:
+        runtime="15m",
+    container:
+        CONTAINERS["python"]
+    script:
+        SCRIPTS / "prepare_spumoni_index.py"
+
+
+SPUMONI_EXTS = [".ms", ".slp", ".msnulldb", ".spumoni", ".pmlnulldb"]
+
+
+rule build_spumoni_index:
+    input:
+        file_list=rules.prepare_spumoni_index.output.file_list,
+        fasta_dir=rules.prepare_spumoni_index.output.fasta_dir,
+    output:
+        multiext(str(RESULTS / "spumoni/db/db"), *SPUMONI_EXTS),
+    log:
+        LOGS / "build_spumoni_index.log",
+    resources:
+        mem_mb=lambda wildcards, attempt: int(12 * GB) * attempt,
+        runtime="2d",
+    container:
+        CONTAINERS["spumoni"]
+    params:
+        opts="-M -P -d -m",
+        prefix=lambda wildcards, output: Path(output[0]).with_suffix(""),
+    shell:
+        "spumoni build {params.opts} -i {input.file_list} -o {params.prefix} &> {log}"
