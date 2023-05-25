@@ -24,6 +24,7 @@ def main():
     groups.insert(0, groups.pop(groups.index("TB")))
 
     outdir = Path(snakemake.output.fasta_dir).resolve()
+    outdir.mkdir(exist_ok=True, parents=True)
 
     counter = 0
 
