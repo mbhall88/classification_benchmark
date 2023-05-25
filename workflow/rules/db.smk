@@ -31,11 +31,11 @@ rule build_kraken_database:
     threads: 16
     resources:
         mem_mb=infer_kraken_memory,
-        runtime="1d",
+        runtime="3d",
     benchmark:
         BENCH / "kraken/build/k{k}/l{l}/{size}.tsv"
     params:
-        opts="--standard --kmer-len {k} --minimizer-len {l} --use-ftp",
+        opts="--standard --kmer-len {k} --minimizer-len {l}",
         max_db_size=infer_max_db_size_opt,
         spaces=infer_minimizer_spaces,
     container:
