@@ -152,6 +152,8 @@ rule index_db_with_minimap2:
     resources:
         mem_mb=lambda wildcards, attempt: attempt * int(32 * GB),
         runtime="5m",
+    benchmark:
+        BENCH / "minimap2/index.tsv"
     log:
         LOGS / "index_decontam_db_with_minimap2.log",
     threads: 4
