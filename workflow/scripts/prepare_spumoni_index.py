@@ -59,8 +59,15 @@ def main():
     print(f"Wrote {counter} fasta files", file=sys.stderr)
 
     # write file list
+    file_list = []
+    for contig, (group, _is_contam) in metadata.items():
+        p = outdir / f"{contig}.fa"
+        assert p.exists(), p
+        i = groups.index(group) + 1
+        file_list.append((i, p, group))
+
     with open(snakemake.output.file_list, "w") as fd:
-        for contig, (group, _is_contam) in metadata.items():
+        for i, p, group in sorted(file_list):
             p = outdir / f"{contig}.fa"
             assert p.exists(), p
             i = groups.index(group) + 1
