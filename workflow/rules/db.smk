@@ -191,6 +191,8 @@ rule build_spumoni_index:
         multiext(str(RESULTS / "spumoni/db/db"), *SPUMONI_EXTS),
     log:
         LOGS / "build_spumoni_index.log",
+    benchmark:
+        BENCH / "spumoni/build.tsv"
     resources:
         mem_mb=lambda wildcards, attempt: int(12 * GB) * attempt,
         runtime="2d",
