@@ -41,7 +41,7 @@ rule build_kraken_database:
     container:
         CONTAINERS["kraken"]
     shell:
-        "kraken2-build {params.opts} {params.max_db_size} {params.spaces} --threads {threads} --db {output.db} &> {log}"
+        "k2 build {params.opts} {params.max_db_size} {params.spaces} --threads {threads} --db {output.db} &> {log}"
 
 
 rule build_decontamination_db:
