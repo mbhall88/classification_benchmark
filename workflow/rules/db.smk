@@ -28,10 +28,10 @@ rule build_kraken_database:
         db=directory(RESULTS / "kraken/db/k{k}/l{l}/{size}"),
     log:
         LOGS / "build_kraken_database/k{k}/l{l}/{size}.log",
-    threads: 16
+    threads: 24
     resources:
         mem_mb=infer_kraken_memory,
-        runtime="3d",
+        runtime="1w",
     benchmark:
         BENCH / "kraken/build/k{k}/l{l}/{size}.tsv"
     params:
@@ -197,7 +197,7 @@ rule build_spumoni_index:
         BENCH / "spumoni/build.tsv"
     resources:
         mem_mb=lambda wildcards, attempt: int(12 * GB) * attempt,
-        runtime="2d",
+        runtime="1w",
     container:
         CONTAINERS["spumoni"]
     params:
