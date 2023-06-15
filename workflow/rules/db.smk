@@ -1,6 +1,105 @@
 from humanfriendly import parse_size
 
 
+rule download_kraken_taxonomy:
+    output:
+        names=RESULTS / "kraken/db/taxonomy/names.dmp",
+        nodes=RESULTS / "kraken/db/taxonomy/nodes.dmp",
+    resources:
+        mem_mb=1000,
+        runtime="12h",
+    container:
+        CONTAINERS["kraken"]
+    params:
+        db=lambda wildcards, output: Path(output.names).parent.parent,
+    log:
+        LOGS / "download_kraken_taxonomy.log",
+    shell:
+        """
+        k2 download-taxonomy --db {params.db} 2> {log}
+        """
+
+
+rule download_kraken_bacteria_db:
+    input:
+        rules.download_kraken_taxonomy.output.names,
+    output:
+        fasta=RESULTS / "kraken/db/library/bacteria/library.fna",
+    resources:
+        mem_mb=int(8 * GB),
+        runtime="1w",
+    container:
+        CONTAINERS["kraken"]
+    params:
+        db=lambda wildcards, input: Path(input[0]).parent.parent,
+    log:
+        LOGS / "download_kraken_bacteria_db.log",
+    shell:
+        """
+        k2 download-library --db {params.db} --library bacteria 2> {log}
+        """
+
+
+rule download_kraken_archaea_db:
+    input:
+        rules.download_kraken_taxonomy.output.names,
+    output:
+        fasta=RESULTS / "kraken/db/library/archaea/library.fna",
+    resources:
+        mem_mb=int(8 * GB),
+        runtime="1w",
+    container:
+        CONTAINERS["kraken"]
+    params:
+        db=lambda wildcards, input: Path(input[0]).parent.parent,
+    log:
+        LOGS / "download_kraken_archaea_db.log",
+    shell:
+        """
+        k2 download-library --db {params.db} --library archaea 2> {log}
+        """
+
+
+rule download_kraken_viral_db:
+    input:
+        rules.download_kraken_taxonomy.output.names,
+    output:
+        fasta=RESULTS / "kraken/db/library/viral/library.fna",
+    resources:
+        mem_mb=int(8 * GB),
+        runtime="1w",
+    container:
+        CONTAINERS["kraken"]
+    params:
+        db=lambda wildcards, input: Path(input[0]).parent.parent,
+    log:
+        LOGS / "download_kraken_viral_db.log",
+    shell:
+        """
+        k2 download-library --db {params.db} --library viral 2> {log}
+        """
+
+
+rule download_kraken_human_db:
+    input:
+        rules.download_kraken_taxonomy.output.names,
+    output:
+        fasta=RESULTS / "kraken/db/library/human/library.fna",
+    resources:
+        mem_mb=int(8 * GB),
+        runtime="1w",
+    container:
+        CONTAINERS["kraken"]
+    params:
+        db=lambda wildcards, input: Path(input[0]).parent.parent,
+    log:
+        LOGS / "download_kraken_human_db.log",
+    shell:
+        """
+        k2 download-library --db {params.db} --library human 2> {log}
+        """
+
+
 def infer_kraken_memory(wildcards, attempt):
     if wildcards.size == "full":
         mb = 40 * GB
@@ -180,28 +279,3 @@ rule prepare_spumoni_index:
         CONTAINERS["python"]
     script:
         SCRIPTS / "prepare_spumoni_index.py"
-
-
-SPUMONI_EXTS = [".ms", ".slp", ".msnulldb", ".spumoni", ".pmlnulldb"]
-
-
-rule build_spumoni_index:
-    input:
-        file_list=rules.prepare_spumoni_index.output.file_list,
-        fasta_dir=rules.prepare_spumoni_index.output.fasta_dir,
-    output:
-        multiext(str(RESULTS / "spumoni/db/db"), *SPUMONI_EXTS),
-    log:
-        LOGS / "build_spumoni_index.log",
-    benchmark:
-        BENCH / "spumoni/build.tsv"
-    resources:
-        mem_mb=lambda wildcards, attempt: int(12 * GB) * attempt,
-        runtime="1w",
-    container:
-        CONTAINERS["spumoni"]
-    params:
-        opts="-M -P -d -m",
-        prefix=lambda wildcards, output: Path(output[0]).with_suffix(""),
-    shell:
-        "spumoni build {params.opts} -i {input.file_list} -o {params.prefix} &> {log}"
