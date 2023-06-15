@@ -102,10 +102,10 @@ rule download_kraken_human_db:
 
 def infer_kraken_memory(wildcards, attempt):
     if wildcards.size == "full":
-        mb = 40 * GB
+        mb = 80 * GB
     else:
         bytes = parse_size(wildcards.size)
-        mb = bytes / (10**6) + (4 * GB)  # add 4gb for wriggle room
+        mb = bytes / (10**6) + (8 * GB)  # add 8gb for wriggle room
     return int(mb) * attempt
 
 
@@ -123,6 +123,8 @@ def infer_minimizer_spaces(wildcards):
 
 
 rule build_kraken_database:
+    input:
+        libs=[RESULTS / f"kraken/db/library/{lib}/library.fna" for lib in kraken_libs]
     output:
         db=directory(RESULTS / "kraken/db/k{k}/l{l}/{size}"),
     log:
@@ -134,13 +136,19 @@ rule build_kraken_database:
     benchmark:
         BENCH / "kraken/build/k{k}/l{l}/{size}.tsv"
     params:
-        opts="--standard --kmer-len {k} --minimizer-len {l}",
+        opts="--kmer-len {k} --minimizer-len {l}",
         max_db_size=infer_max_db_size_opt,
         spaces=infer_minimizer_spaces,
+        original_db=lambda wildcards, input: Path(input.libs[0]).parent.parent.parent
     container:
         CONTAINERS["kraken"]
     shell:
-        "k2 build {params.opts} {params.max_db_size} {params.spaces} --threads {threads} --db {output.db} &> {log}"
+        """
+        echo "Copying original db" > {log}
+        cp -r {params.original_db} {output.db} 2>> {log}
+        echo "Finished copying db" >> {log}
+        k2 build {params.opts} {params.max_db_size} {params.spaces} --threads {threads} --db {output.db} &>> {log}
+        """
 
 
 rule build_decontamination_db:
