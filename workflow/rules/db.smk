@@ -100,6 +100,26 @@ rule download_kraken_human_db:
         """
 
 
+rule download_kraken_plasmid_db:
+    input:
+        rules.download_kraken_taxonomy.output.names,
+    output:
+        fasta=RESULTS / "kraken/db/library/plasmid/library.fna",
+    resources:
+        mem_mb=int(8 * GB),
+        runtime="1w",
+    container:
+        CONTAINERS["kraken"]
+    params:
+        db=lambda wildcards, input: Path(input[0]).parent.parent,
+    log:
+        LOGS / "download_kraken_plasmid_db.log",
+    shell:
+        """
+        k2 download-library --db {params.db} --library plasmid 2> {log}
+        """
+
+
 def infer_kraken_memory(wildcards, attempt):
     if wildcards.size == "full":
         mb = 80 * GB
@@ -124,7 +144,7 @@ def infer_minimizer_spaces(wildcards):
 
 rule build_kraken_database:
     input:
-        libs=[RESULTS / f"kraken/db/library/{lib}/library.fna" for lib in kraken_libs]
+        libs=[RESULTS / f"kraken/db/library/{lib}/library.fna" for lib in kraken_libs],
     output:
         db=directory(RESULTS / "kraken/db/k{k}/l{l}/{size}"),
     log:
@@ -139,7 +159,7 @@ rule build_kraken_database:
         opts="--kmer-len {k} --minimizer-len {l}",
         max_db_size=infer_max_db_size_opt,
         spaces=infer_minimizer_spaces,
-        original_db=lambda wildcards, input: Path(input.libs[0]).parent.parent.parent
+        original_db=lambda wildcards, input: Path(input.libs[0]).parent.parent.parent,
     container:
         CONTAINERS["kraken"]
     shell:

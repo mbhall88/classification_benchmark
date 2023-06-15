@@ -26,7 +26,7 @@ for size in config["kraken_db_size"]:
         l = d["l"]
         target_files.add(RESULTS / f"kraken/db/k{k}/l{l}/{size}")
 
-kraken_libs = ["bacteria", "archaea", "viral", "human"]
+kraken_libs = ["bacteria", "archaea", "viral", "human", "plasmid"]
 
 for lib in kraken_libs:
     target_files.add(RESULTS / f"kraken/db/library/{lib}/library.fna")
