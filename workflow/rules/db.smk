@@ -146,7 +146,7 @@ rule build_kraken_database:
     input:
         libs=[RESULTS / f"kraken/db/library/{lib}/library.fna" for lib in kraken_libs],
     output:
-        db=directory(RESULTS / "kraken/db/k{k}/l{l}/{size}"),
+        db=directory(RESULTS / "kraken/k{k}/l{l}/{size}/db"),
     log:
         LOGS / "build_kraken_database/k{k}/l{l}/{size}.log",
     threads: 24
