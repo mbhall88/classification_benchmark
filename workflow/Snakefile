@@ -24,7 +24,7 @@ for size in config["kraken_db_size"]:
     for d in config["kraken_wl_sizes"]:
         k = d["k"]
         l = d["l"]
-        target_files.add(RESULTS / f"kraken/db/k{k}/l{l}/{size}")
+        target_files.add(RESULTS / f"kraken/k{k}/l{l}/{size}/db")
 
 kraken_libs = ["bacteria", "archaea", "viral", "human", "plasmid"]
 
