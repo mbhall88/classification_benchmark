@@ -148,10 +148,10 @@ rule build_kraken_database:
         db=directory(RESULTS / "kraken/k{k}/l{l}/{size}/db"),
     log:
         LOGS / "build_kraken_database/k{k}/l{l}/{size}.log",
-    threads: 24
+    threads: 16
     resources:
         mem_mb=infer_kraken_memory,
-        runtime="1w",
+        runtime=lambda wildcards, attempt: f"{attempt}d",
     benchmark:
         BENCH / "kraken/build/k{k}/l{l}/{size}.tsv"
     params:
