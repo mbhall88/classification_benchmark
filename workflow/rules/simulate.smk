@@ -4,7 +4,7 @@ organisms = ["Human", "Virus", "Bacteria", "NTM", "TB"]
 rule separate_db_by_organism:
     input:
         metadata=rules.combine_references.output.metadata,
-        fasta=rules.combine_references.output.fasta,
+        fasta=rules.faidx_db.output.fasta,
         faidx=rules.faidx_db.output.faidx,
     output:
         refs=[RESULTS / f"simulate/references/{org}.fa.gz" for org in organisms],
