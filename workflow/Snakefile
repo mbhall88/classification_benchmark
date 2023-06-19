@@ -1,5 +1,6 @@
 import pandas as pd
 from pathlib import Path
+from humanfriendly import parse_size
 
 
 configfile: "config/config.yaml"
@@ -33,6 +34,8 @@ for lib in kraken_libs:
 
 target_files.add(RESULTS / "db/db.fa.gz")
 
+target_files.add(RESULTS / "simulate/reads/metagenome.fq.gz")
+
 
 localrules:
     all,
@@ -44,3 +47,4 @@ rule all:
 
 
 include: RULES / "db.smk"
+include: RULES / "simulate.smk"

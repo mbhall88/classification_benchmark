@@ -1,4 +1,3 @@
-from humanfriendly import parse_size
 
 
 rule download_kraken_taxonomy:
@@ -269,6 +268,22 @@ rule combine_references:
         CONTAINERS["python"]
     script:
         SCRIPTS / "combine_references.py"
+
+
+rule faidx_db:
+    input:
+        fasta=rules.combine_references.output.fasta,
+    output:
+        faidx=RESULTS / "db/db.fa.gz.gzi"
+    log:
+        LOGS / "faidx_db.log"
+    resources:
+        runtime="30m",
+    container:
+        CONTAINERS["samtools"]
+    shell:
+        "samtools faidx {input.fasta} 2> {log}"
+
 
 
 rule index_db_with_minimap2:
