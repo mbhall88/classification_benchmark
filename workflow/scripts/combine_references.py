@@ -41,7 +41,11 @@ def main():
             snakemake.input.ancestral,
             *snakemake.input.gramtools_asms,
         ]:
-            with open(f, "rb") as fd:
+            if f.endswith(".gz"):
+                openf = gzip.open
+            else:
+                openf = open
+            with openf(f, "rb") as fd:
                 shutil.copyfileobj(fd, wfd)
 
 

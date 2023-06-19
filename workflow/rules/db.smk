@@ -258,7 +258,7 @@ rule combine_references:
         ancestral=rules.download_ancestral_genome.output.asm,
         gramtools_asms=rules.download_mtb_lineage_refs.output.asms,
     output:
-        fasta=RESULTS / "db/db.fa.gz",
+        fasta=RESULTS / "db/db.fa",
         metadata=RESULTS / "db/db.tsv",
     log:
         LOGS / "combine_references.log",
@@ -274,6 +274,7 @@ rule faidx_db:
     input:
         fasta=rules.combine_references.output.fasta,
     output:
+        fasta=RESULTS / "db/db.fa.gz",
         faidx=RESULTS / "db/db.fa.gz.gzi"
     log:
         LOGS / "faidx_db.log"
@@ -282,13 +283,15 @@ rule faidx_db:
     container:
         CONTAINERS["samtools"]
     shell:
-        "samtools faidx {input.fasta} 2> {log}"
+        """
+        bgzip --index -f {input} 2> {log}
+        """
 
 
 
 rule index_db_with_minimap2:
     input:
-        fasta=rules.combine_references.output.fasta,
+        fasta=rules.faidx_db.output.fasta,
     output:
         index=RESULTS / "db/db.fa.gz.map-ont.mmi",
     resources:
@@ -309,7 +312,7 @@ rule index_db_with_minimap2:
 
 rule prepare_spumoni_index:
     input:
-        fasta=rules.combine_references.output.fasta,
+        fasta=rules.faidx_db.output.fasta,
         metadata=rules.combine_references.output.metadata,
     output:
         file_list=RESULTS / "spumoni/db/file_list.txt",
