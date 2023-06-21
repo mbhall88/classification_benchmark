@@ -142,7 +142,7 @@ rule build_kraken_database:
     threads: 16
     resources:
         mem_mb=lambda wildcards, attempt: int(80 * GB) * attempt,
-        runtime=lambda wildcards, attempt: f"{attempt}d",
+        runtime=lambda wildcards, attempt: f"{2*attempt}d",
     benchmark:
         BENCH / "kraken/build/k{k}/l{l}/{size}.tsv"
     params:
