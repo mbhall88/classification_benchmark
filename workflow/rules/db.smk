@@ -119,15 +119,6 @@ rule download_kraken_plasmid_db:
         """
 
 
-def infer_kraken_memory(wildcards, attempt):
-    if wildcards.size == "full":
-        mb = 80 * GB
-    else:
-        bytes = parse_size(wildcards.size)
-        mb = bytes / (10**6) + (8 * GB)  # add 8gb for wriggle room
-    return int(mb) * attempt
-
-
 def infer_max_db_size_opt(wildcards):
     if wildcards.size == "full":
         return ""
@@ -150,7 +141,7 @@ rule build_kraken_database:
         LOGS / "build_kraken_database/k{k}/l{l}/{size}.log",
     threads: 16
     resources:
-        mem_mb=infer_kraken_memory,
+        mem_mb=lambda wildcards, attempt: int(80 * GB) * attempt,
         runtime=lambda wildcards, attempt: f"{attempt}d",
     benchmark:
         BENCH / "kraken/build/k{k}/l{l}/{size}.tsv"
