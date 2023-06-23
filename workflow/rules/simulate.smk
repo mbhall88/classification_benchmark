@@ -78,7 +78,7 @@ rule simulate_nanopore_reads:
     shell:
         """
         exec 2> {log}
-        bases=$(({params.total_bases} / {threads}))
+        bases=$(python -c "print(int({params.total_bases} / {threads}))")
         for p in $(seq 1 {threads}); do
             reads=temp_"$p".fq
             badread simulate --reference {input.reference} --quantity $bases {params.opts} > $reads &
