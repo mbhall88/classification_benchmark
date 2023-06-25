@@ -266,9 +266,9 @@ rule faidx_db:
         fasta=rules.combine_references.output.fasta,
     output:
         fasta=RESULTS / "db/db.fa.gz",
-        faidx=RESULTS / "db/db.fa.gz.gzi"
+        faidx=RESULTS / "db/db.fa.gz.gzi",
     log:
-        LOGS / "faidx_db.log"
+        LOGS / "faidx_db.log",
     resources:
         runtime="30m",
     container:
@@ -279,12 +279,11 @@ rule faidx_db:
         """
 
 
-
 rule index_db_with_minimap2:
     input:
         fasta=rules.faidx_db.output.fasta,
     output:
-        index=RESULTS / "db/db.fa.gz.map-ont.mmi",
+        index=RESULTS / "db/minimap2/db.fa.gz.map-ont.mmi",
     resources:
         mem_mb=lambda wildcards, attempt: attempt * int(32 * GB),
         runtime="5m",
@@ -316,3 +315,24 @@ rule prepare_spumoni_index:
         CONTAINERS["python"]
     script:
         SCRIPTS / "prepare_spumoni_index.py"
+
+
+rule index_db_with_mashmap:
+    input:
+        fasta=rules.faidx_db.output.fasta,
+    output:
+        map=RESULTS / "db/mashmap/db.map",
+        index=RESULTS / "db/mashmap/db.index",
+    log:
+        LOGS / "index_db_with_mashmap.log",
+    resources:
+        runtime="2h",
+        mem_mb=int(16 * GB),
+    threads: 8
+    params:
+        prefix=lambda wildcards, output: Path(output.index).with_suffix(""),
+        seglength=500,
+    container:
+        CONTAINERS["mashmap"]
+    shell:
+        "mashmap --saveIndex {params.prefix} -r {input.fasta} -s {params.seglength} -t {threads} 2> {log}"
