@@ -34,7 +34,7 @@ for lib in kraken_libs:
 
 target_files.add(RESULTS / "db/db.fa.gz")
 
-target_files.add(RESULTS / "simulate/reads/metagenome.fq.gz")
+target_files.add(RESULTS / "simulate/reads/metagenome.ont.fq.gz")
 
 
 localrules:

@@ -63,7 +63,7 @@ rule simulate_nanopore_reads:
     input:
         reference=infer_simulate_input,
     output:
-        fastq=RESULTS / "simulate/reads/{read_type}.fq.gz",
+        fastq=RESULTS / "simulate/reads/{read_type}.ont.fq.gz",
     log:
         LOGS / "simulate_nanopore_reads/{read_type}.log",
     threads: 8
@@ -92,11 +92,11 @@ rule simulate_nanopore_reads:
 rule combine_simulated_reads:
     input:
         fastqs=[
-            RESULTS / f"simulate/reads/{read_type}.fq.gz"
+            RESULTS / f"simulate/reads/{read_type}.ont.fq.gz"
             for read_type in config["simulate"]["proportions"]
         ],
     output:
-        reads=RESULTS / "simulate/reads/metagenome.fq.gz",
+        reads=RESULTS / "simulate/reads/metagenome.ont.fq.gz",
     log:
         LOGS / "combine_simulated_reads.log",
     resources:
