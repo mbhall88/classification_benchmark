@@ -327,7 +327,7 @@ rule index_db_with_mashmap:
         LOGS / "index_db_with_mashmap.log",
     resources:
         runtime="2h",
-        mem_mb=int(16 * GB),
+        mem_mb=int(32 * GB),
     threads: 8
     params:
         prefix=lambda wildcards, output: Path(output.index).with_suffix(""),
