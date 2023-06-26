@@ -36,6 +36,7 @@ target_files.add(RESULTS / "db/db.fa.gz")
 
 target_files.add(RESULTS / "simulate/reads/metagenome.ont.fq.gz")
 target_files.add(RESULTS / "db/minimap2/db.fa.gz.map-ont.mmi")
+target_files.add(RESULTS / "simulate/references/genera")
 
 
 localrules:

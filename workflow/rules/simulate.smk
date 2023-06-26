@@ -19,6 +19,44 @@ rule separate_db_by_organism:
         SCRIPTS / "separate_db_by_organism.py"
 
 
+rule index_kraken_bacteria_library:
+    input:
+        fasta=rules.download_kraken_bacteria_db.output.fasta,
+    output:
+        idx=RESULTS / "kraken/db/library/bacteria/library.fna.fai",
+    log:
+        LOGS / "index_kraken_bacteria_library.log"
+    resources:
+        runtime="30m",
+    container:
+        CONTAINERS["samtools"]
+    shell:
+        "samtools faidx {input.fasta} 2> {log}"
+# todo - rule to generate list of seqids that pass asm length filters and genera counts
+rule filter_bacteria_assemblies:
+    input:
+        faidx=rules.index_kraken_bacteria_library.output.idx,
+        fasta=rules.index_kraken_bacteria_library.input.fasta,
+    output:
+        outdir=directory(RESULTS / "simulate/references/genera")
+    log:
+        LOGS / "filter_bacteria_assemblies.log"
+    resources:
+        runtime="8h",
+        mem_mb=int(4 * GB)
+    container:
+        CONTAINERS["pysam"]
+    params:
+        min_length=50_000,
+        min_asm=10,
+        max_asm=1_000,
+        exclude=["Mycobacterium"]
+    script:
+        SCRIPTS / "filter_bacteria_assemblies.py"
+# todo - extract fasta for each genera and run assembly derep on each genera
+# todo - combine genera into bacteria fasta
+
+
 def simulate_options(wildcards):
     opts = []
     if wildcards.read_type == "Unmapped":
