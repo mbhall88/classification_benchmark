@@ -42,7 +42,7 @@ rule filter_bacteria_assemblies:
     log:
         LOGS / "filter_bacteria_assemblies.log"
     resources:
-        runtime="8h",
+        runtime="1h",
         mem_mb=int(4 * GB)
     container:
         CONTAINERS["pysam"]
