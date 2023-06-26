@@ -315,24 +315,3 @@ rule prepare_spumoni_index:
         CONTAINERS["python"]
     script:
         SCRIPTS / "prepare_spumoni_index.py"
-
-
-rule index_db_with_mashmap:
-    input:
-        fasta=rules.faidx_db.output.fasta,
-    output:
-        map=RESULTS / "db/mashmap/db.map",
-        index=RESULTS / "db/mashmap/db.index",
-    log:
-        LOGS / "index_db_with_mashmap.log",
-    resources:
-        runtime="2h",
-        mem_mb=lambda wildcards, attempt: int(64 * GB) * attempt,
-    threads: 8
-    params:
-        prefix=lambda wildcards, output: Path(output.index).with_suffix(""),
-        seglength=500,
-    container:
-        CONTAINERS["mashmap"]
-    shell:
-        "mashmap --saveIndex {params.prefix} -r {input.fasta} -s {params.seglength} -t {threads} 2> {log}"

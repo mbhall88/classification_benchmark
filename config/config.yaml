@@ -19,8 +19,7 @@ containers:
   minimap2: "docker://quay.io/biocontainers/minimap2:2.26--he4a0461_1"
   pysam: "docker://quay.io/biocontainers/pysam:0.21.0--py310h41dec4a_1"
   samtools: "docker://quay.io/biocontainers/samtools:1.17--hd87286a_1"
-  badread: "docker://quay.io/biocontainers/badread:0.4.0--pyhdfd78af_0"
-  mashmap: "docker://quay.io/biocontainers/mashmap:3.0.4--h97b747e_0"
+  badread: "docker://quay.io/biocontainers/badread:0.4.0--pyhdfd78af_1"
 
 ancestral_genome:
   url: "https://zenodo.org/record/3497110/files/MTB_ancestor_reference.fasta"
