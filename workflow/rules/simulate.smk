@@ -32,7 +32,7 @@ rule index_kraken_bacteria_library:
         CONTAINERS["samtools"]
     shell:
         "samtools faidx {input.fasta} 2> {log}"
-# todo - rule to generate list of seqids that pass asm length filters and genera counts
+
 rule filter_bacteria_assemblies:
     input:
         faidx=rules.index_kraken_bacteria_library.output.idx,
@@ -53,7 +53,7 @@ rule filter_bacteria_assemblies:
         exclude=["Mycobacterium"]
     script:
         SCRIPTS / "filter_bacteria_assemblies.py"
-# todo - extract fasta for each genera and run assembly derep on each genera
+# todo - run assembly derep on each genera
 # todo - combine genera into bacteria fasta
 
 

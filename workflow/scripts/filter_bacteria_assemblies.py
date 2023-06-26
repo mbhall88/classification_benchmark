@@ -6,6 +6,20 @@ import pysam
 from collections import defaultdict
 import random
 from pathlib import Path
+import re
+
+
+def only_alphabetic(s: str) -> str:
+    return re.sub(r"[^a-zA-Z]", "", s)
+
+
+def extract_genus_from_comment(comment: str) -> str:
+    fields = comment.split()
+    genus = only_alphabetic(fields[0])
+    if genus.isupper():
+        genus = only_alphabetic(fields[1])
+
+    return genus
 
 
 def main():
@@ -16,7 +30,7 @@ def main():
 
     with pysam.FastxFile(snakemake.input.fasta) as fd:
         for entry in fd:
-            genus = entry.comment.split()[0]
+            genus = extract_genus_from_comment(entry.comment)
             if (
                 genus in exclude_genera
                 or len(entry.sequence) < snakemake.params.min_length
