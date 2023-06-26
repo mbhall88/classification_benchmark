@@ -68,7 +68,7 @@ rule simulate_nanopore_reads:
         LOGS / "simulate_nanopore_reads/{read_type}.log",
     threads: 8
     resources:
-        mem_mb=int(8 * GB),
+        mem_mb=lambda wildcards, attempt: attempt * int(16 * GB),
         runtime="2d",
     container:
         CONTAINERS["badread"]
