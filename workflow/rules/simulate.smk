@@ -75,17 +75,20 @@ rule simulate_nanopore_reads:
     params:
         opts=simulate_options,
         total_bases=calculate_total_bases,
+    shadow:
+        "shallow"
     shell:
         """
         exec 2> {log}
         bases=$(python -c "print(int({params.total_bases} / {threads}))")
+        tmpd=$(mktemp -d)
         for p in $(seq 1 {threads}); do
-            reads=temp_"$p".fq
+            reads="$tmpd/$p.fq"
             badread simulate --reference {input.reference} --quantity $bases {params.opts} > $reads &
         done
         wait
-        cat temp_*.fq | gzip > {output.fastq}
-        rm temp_*.fq
+        cat $tmpd/*.fq | gzip > {output.fastq}
+        rm -rf $tmpd
         """
 
 
