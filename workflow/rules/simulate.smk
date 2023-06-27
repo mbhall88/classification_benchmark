@@ -7,7 +7,7 @@ rule separate_db_by_organism:
         fasta=rules.faidx_db.output.fasta,
         faidx=rules.faidx_db.output.faidx,
     output:
-        refs=[RESULTS / f"simulate/references/{org}.fa.gz" for org in organisms],
+        refs=[RESULTS / f"simulate/references/{org}.fa.gz" for org in ["NTM", "TB"]],
     log:
         LOGS / "separate_db_by_organism.log",
     resources:
@@ -92,7 +92,20 @@ rule reduce_bacteria_assemblies:
         """
 
 
-# todo - combine genera into bacteria fasta
+rule combine_bacteria_assemblies:
+    input:
+        asmdir=rules.reduce_bacteria_assemblies.output.outdir,
+    output:
+        fasta=RESULTS / "simulate/references/Bacteria.fa.gz",
+    log:
+        LOGS / "combine_bacteria_assemblies.log",
+    resources:
+        mem_mb=GB,
+        runtime="2h",
+    container:
+        CONTAINERS["rs_utils"]
+    shell:
+        "fd -e fa -X gzip -c \; . {input.asmdir} 2> {log} > {output.fasta}"
 
 
 def simulate_options(wildcards):
@@ -131,8 +144,12 @@ def infer_simulate_input(wildcards):
     if wildcards.read_type == "Unmapped":
         # just pick smallest fasta as we wont actually take sequences from it
         return str(RESULTS / "simulate/references/TB.fa.gz")
-    else:
+    elif wildcards.read_type in ("NTM", "TB", "Bacteria"):
         return str(RESULTS / f"simulate/references/{wildcards.read_type}.fa.gz")
+    else:
+        return str(
+            RESULTS / f"kraken/db/library/{wildcards.read_type.lower()}/library.fna"
+        )
 
 
 rule simulate_nanopore_reads:

@@ -20,6 +20,7 @@ containers:
   pysam: "docker://quay.io/biocontainers/pysam:0.21.0--py310h41dec4a_1"
   samtools: "docker://quay.io/biocontainers/samtools:1.17--hd87286a_1"
   badread: "docker://quay.io/biocontainers/badread:0.4.0--pyhdfd78af_1"
+  rs_utils: "docker://quay.io/mbhall88/rs-utils:0.1.0"
 
 ancestral_genome:
   url: "https://zenodo.org/record/3497110/files/MTB_ancestor_reference.fasta"
