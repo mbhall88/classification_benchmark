@@ -25,7 +25,7 @@ rule index_kraken_bacteria_library:
     output:
         idx=RESULTS / "kraken/db/library/bacteria/library.fna.fai",
     log:
-        LOGS / "index_kraken_bacteria_library.log"
+        LOGS / "index_kraken_bacteria_library.log",
     resources:
         runtime="30m",
     container:
@@ -33,27 +33,59 @@ rule index_kraken_bacteria_library:
     shell:
         "samtools faidx {input.fasta} 2> {log}"
 
+
 rule filter_bacteria_assemblies:
     input:
         faidx=rules.index_kraken_bacteria_library.output.idx,
         fasta=rules.index_kraken_bacteria_library.input.fasta,
     output:
-        outdir=directory(RESULTS / "simulate/references/genera")
+        outdir=directory(RESULTS / "simulate/references/genera"),
     log:
-        LOGS / "filter_bacteria_assemblies.log"
+        LOGS / "filter_bacteria_assemblies.log",
     resources:
         runtime="1h",
-        mem_mb=int(4 * GB)
+        mem_mb=int(4 * GB),
     container:
         CONTAINERS["pysam"]
     params:
         min_length=50_000,
         min_asm=10,
         max_asm=1_000,
-        exclude=["Mycobacterium"]
+        exclude=["Mycobacterium"],
     script:
         SCRIPTS / "filter_bacteria_assemblies.py"
-# todo - run assembly derep on each genera
+
+
+rule reduce_bacteria_assemblies:
+    input:
+        indir=rules.filter_bacteria_assemblies.output.outdir,
+        script=SCRIPTS / "dereplicator.py",
+    output:
+        outdir=directory(RESULTS / "simulate/references/refined_genera"),
+    log:
+        LOGS / "reduce_bacteria_assemblies.log",
+    threads: 16
+    resources:
+        runtime="6h",
+        mem_mb=int(16 * GB),
+    conda:
+        ENVS / "derep.yaml"
+    params:
+        opts="-d 0.01",
+    shell:
+        """
+        exec &> {log}
+        for dir in {input.indir}/*/
+        do
+            dir=${{dir%/}}
+            genus=${{dir##*/}}
+            echo "Dereplicating $genus"
+            outdir={output.outdir}/$genus
+            python {input.script} {params.opts} --threads {threads} $dir $outdir
+        done
+        """
+
+
 # todo - combine genera into bacteria fasta
 
 

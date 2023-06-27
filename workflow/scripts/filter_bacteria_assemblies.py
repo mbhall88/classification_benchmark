@@ -7,6 +7,7 @@ from collections import defaultdict
 import random
 from pathlib import Path
 import re
+import gzip
 
 
 def only_alphabetic(s: str) -> str:
@@ -57,9 +58,13 @@ def main():
     fa = pysam.FastaFile(snakemake.input.fasta)
 
     for genus, headers in genera_map.items():
-        with open(outdir / f"{genus}.fa", "w") as fd:
-            for header in headers:
-                seqid = header.split()[0]
+        genus_dir = outdir / genus
+        genus_dir.mkdir()
+
+        for header in headers:
+            seqid = header.split()[0]
+            p = genus_dir / f"{seqid}.fa.gz"
+            with gzip.open(p, mode="wt", encoding="UTF-8") as fd:
                 seq = fa.fetch(seqid)
                 print(f">{header} circular=true", file=fd)
                 print(seq, file=fd)

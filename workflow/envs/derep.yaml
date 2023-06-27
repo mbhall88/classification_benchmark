@@ -1,0 +1,7 @@
+name: derep
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.8
+  - mash=2.3
