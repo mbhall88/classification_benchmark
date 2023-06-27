@@ -148,10 +148,10 @@ def infer_simulate_input(wildcards):
         return str(RESULTS / f"simulate/references/{wildcards.read_type}.fa.gz")
     elif wildcards.read_type == "Human":
         return str(
-            results / f"kraken/db/library/{wildcards.read_type.lower()}/library.fna"
+            RESULTS / f"kraken/db/library/{wildcards.read_type.lower()}/library.fna"
         )
     elif wildcards.read_type == "Virus":
-        return str(results / f"kraken/db/library/viral/library.fna")
+        return str(RESULTS / f"kraken/db/library/viral/library.fna")
     else:
         raise NotImplementedError(f"Don't know what reference for {wildcards.read_type}")
 
