@@ -122,7 +122,7 @@ def simulate_options(wildcards):
     opts.append(f"--random_reads {random_reads}")
     opts.append(f"--chimeras {chimera}")
 
-    if wildcards.read_type in ("NTM", "TB"):
+    if wildcards.read_type in ("NTM", "TB", "Virus"):
         length = "4000,3000"
         opts.append(f"--length {length}")
 
