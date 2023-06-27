@@ -146,10 +146,22 @@ def infer_simulate_input(wildcards):
         return str(RESULTS / "simulate/references/TB.fa.gz")
     elif wildcards.read_type in ("NTM", "TB", "Bacteria"):
         return str(RESULTS / f"simulate/references/{wildcards.read_type}.fa.gz")
-    else:
+    elif wildcards.read_type == "Human":
         return str(
-            RESULTS / f"kraken/db/library/{wildcards.read_type.lower()}/library.fna"
+            results / f"kraken/db/library/{wildcards.read_type.lower()}/library.fna"
         )
+    elif wildcards.read_type == "Virus":
+        return str(results / f"kraken/db/library/viral/library.fna")
+
+
+simulate_mem = {
+    "Bacteria": 64 * GB,
+    "Human": 64 * GB,
+    "Virus": 8 * GB,
+    "TB": 2 * GB,
+    "NTM": 2 * GB,
+    "Unmapped": 2 * GB,
+}
 
 
 rule simulate_nanopore_reads:
@@ -161,7 +173,7 @@ rule simulate_nanopore_reads:
         LOGS / "simulate_nanopore_reads/{read_type}.log",
     threads: 8
     resources:
-        mem_mb=lambda wildcards, attempt: attempt * int(16 * GB),
+        mem_mb=lambda wildcards, attempt: attempt * simulate_mem[wildcards.read_type],
         runtime="2d",
     container:
         CONTAINERS["badread"]
