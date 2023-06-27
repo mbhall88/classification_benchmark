@@ -77,7 +77,7 @@ rule reduce_bacteria_assemblies:
     conda:
         ENVS / "derep.yaml"
     params:
-        opts="-d 0.01",
+        opts="-f 0.1",
     shell:
         """
         exec &> {log}
