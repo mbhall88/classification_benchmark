@@ -152,6 +152,8 @@ def infer_simulate_input(wildcards):
         )
     elif wildcards.read_type == "Virus":
         return str(results / f"kraken/db/library/viral/library.fna")
+    else:
+        raise NotImplementedError(f"Don't know what reference for {wildcards.read_type}")
 
 
 simulate_mem = {
