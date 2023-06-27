@@ -51,7 +51,13 @@ rule filter_bacteria_assemblies:
         min_length=50_000,
         min_asm=10,
         max_asm=1_000,
-        exclude=["Mycobacterium"],
+        exclude=[
+            "Mycobacterium",
+            "Mycobacteroides",
+            "Mycolicibacter",
+            "Mycolicibacterium",
+            "Mycolicibacillus",
+        ],
     script:
         SCRIPTS / "filter_bacteria_assemblies.py"
 
