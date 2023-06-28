@@ -157,12 +157,12 @@ def infer_simulate_input(wildcards):
 
 
 simulate_mem = {
-    "Bacteria": 64 * GB,
-    "Human": 64 * GB,
-    "Virus": 8 * GB,
-    "TB": 2 * GB,
-    "NTM": 2 * GB,
-    "Unmapped": 2 * GB,
+    "Bacteria": 128 * GB,
+    "Human": 128 * GB,
+    "Virus": 16 * GB,
+    "TB": 4 * GB,
+    "NTM": 4 * GB,
+    "Unmapped": 4 * GB,
 }
 
 
