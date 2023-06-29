@@ -58,7 +58,7 @@ rule kraken_human_classify:
         report=RESULTS / "dehumanise/kraken/classify/k{k}l{l}/metagenome.ont.k2report",
         out=RESULTS / "dehumanise/kraken/classify/k{k}l{l}/metagenome.ont.k2",
     log:
-        LOGS / "kraken_human_classify",
+        LOGS / "kraken_human_classify/k{k}l{l}/ont.log",
     threads: 4
     resources:
         mem_mb=lambda wildcards, attempt: attempt * int(8 * GB),
