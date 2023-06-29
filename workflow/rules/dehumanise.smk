@@ -22,9 +22,11 @@ rule sra_human_scrubber:
         """
         exec 2> {log}
         tmpout=$(mktemp -u --suffix='.fq')
-        scrub.sh {params.opts} -p {threads} -o "$tmpout" <(zcat {input.reads}) >> {log}
+        tmpin=$(mktemp -u --suffix='.fq')
+        gzip -dc {input.reads} > "$tmpin"
+        scrub.sh {params.opts} -p {threads} -o "$tmpout" "$tmpin" >> {log}
         gzip -c "$tmpout" > {output.reads}
-        gzip -c "$tmpout".removed_spots > {output.removed}
+        gzip -c "$tmpin".removed_spots > {output.removed}
         """
 
 
@@ -38,7 +40,7 @@ rule minimap2_human_scrubber:
         LOGS / "minimap2_human_scrubber.log",
     threads: 4
     resources:
-        mem_mb=lambda wildcards, attempt: attempt * int(8 * GB),
+        mem_mb=lambda wildcards, attempt: attempt * int(12 * GB),
         runtime="30m",
     benchmark:
         BENCH / "dehumanise/minimap2/ont.tsv"
