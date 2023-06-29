@@ -26,6 +26,9 @@ for size in config["kraken_db_size"]:
         k = d["k"]
         l = d["l"]
         target_files.add(RESULTS / f"kraken/k{k}/l{l}/{size}/db")
+        target_files.add(
+            RESULTS / f"dehumanise/kraken/classify/k{k}l{l}/metagenome.ont.k2"
+        )
 
 kraken_libs = ["bacteria", "archaea", "viral", "human", "plasmid"]
 
@@ -35,6 +38,8 @@ for lib in kraken_libs:
 
 target_files.add(RESULTS / "simulate/reads/metagenome.ont.fq.gz")
 target_files.add(RESULTS / "db/minimap2/db.fa.gz.map-ont.mmi")
+target_files.add(RESULTS / "dehumanise/minimap2/metagenome.aln.ont.paf")
+target_files.add(RESULTS / "dehumanise/sra/metagenome.scrubbed.ont.fq.gz")
 
 
 localrules:
@@ -48,3 +53,4 @@ rule all:
 
 include: RULES / "db.smk"
 include: RULES / "simulate.smk"
+include: RULES / "dehumanise.smk"

@@ -1,6 +1,3 @@
-organisms = ["Human", "Virus", "Bacteria", "NTM", "TB"]
-
-
 rule separate_db_by_organism:
     input:
         metadata=rules.combine_references.output.metadata,

@@ -161,6 +161,34 @@ rule build_kraken_database:
         """
 
 
+rule build_kraken_human_database:
+    input:
+        libs=rules.download_kraken_human_db.output.fasta,
+        taxonomy=rules.download_kraken_taxonomy.output.names,
+    output:
+        db=directory(RESULTS / "dehumanise/kraken/db/k{k}/l{l}/db"),
+    log:
+        LOGS / "build_kraken_human_database/k{k}/l{l}.log",
+    threads: 8
+    resources:
+        mem_mb=lambda wildcards, attempt: int(16 * GB) * attempt,
+        runtime=lambda wildcards, attempt: f"{attempt * 4}h",
+    params:
+        opts="--kmer-len {k} --minimizer-len {l}",
+        spaces=infer_minimizer_spaces,
+    container:
+        CONTAINERS["kraken"]
+    shell:
+        """
+        echo "Copying original db" > {log}
+        mkdir -p {output.db}/library 2>> {log}
+        cp -r $(dirname {input.taxonomy}) {output.db}/taxonomy 2>> {log}
+        cp -r $(dirname {input.libs}) {output.db}/library/ 2>> {log}
+        echo "Finished copying db" >> {log}
+        k2 build {params.opts} {params.spaces} --threads {threads} --db {output.db} &>> {log}
+        """
+
+
 rule build_decontamination_db:
     output:
         fasta=temp(RESULTS / "db/remove_contam.fa.gz"),
@@ -315,3 +343,18 @@ rule prepare_spumoni_index:
         CONTAINERS["python"]
     script:
         SCRIPTS / "prepare_spumoni_index.py"
+
+
+rule download_chm13:
+    output:
+        fasta=RESULTS / "db/chm13.fa.gz",
+    log:
+        LOGS / "download_chm13.log",
+    resources:
+        runtime="10m",
+    container:
+        CONTAINERS["base"]
+    params:
+        url="https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/CHM13/assemblies/analysis_set/chm13v2.0.fa.gz",
+    shell:
+        "wget {params.url} -O {output.fasta} 2> {log}"
