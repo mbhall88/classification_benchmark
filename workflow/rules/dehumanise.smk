@@ -54,7 +54,7 @@ rule minimap2_human_scrubber:
 
 rule kraken_human_classify:
     input:
-        db=directory(RESULTS / "dehumanise/kraken/db/k{k}/l{l}/db"),
+        db=rules.build_kraken_human_database.output.db,
         reads=rules.sra_human_scrubber.input.reads,
     output:
         report=RESULTS / "dehumanise/kraken/classify/k{k}l{l}/metagenome.ont.k2report",
