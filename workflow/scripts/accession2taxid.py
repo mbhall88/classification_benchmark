@@ -124,9 +124,9 @@ def main():
                             seqid = seqid.split("|")[-1]
                         try:
                             taxid = accession2taxid(seqid)
-                        except HTTPError as err:
+                        except Exception as err:
                             print(
-                                f"Failed to fetch taxid for {seqid} from {organism} {header}",
+                                f"Failed to fetch taxid ({taxid}) for {seqid} from {organism} {header}",
                                 file=sys.stderr,
                             )
                             raise err
