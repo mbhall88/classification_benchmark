@@ -43,7 +43,7 @@ def accession2taxid(acc: str) -> str:
     handle = Entrez.efetch(db="nucleotide", id=acc, retmode="text", rettype="gb")
     record = SeqIO.read(handle, "gb")
     handle = Entrez.esearch(db="taxonomy", term=record.annotations["organism"])
-    record = Entrez.read(handle)
+    record = handle.read()
     if len(record["IdList"]) > 1:
         raise ValueError(
             f"Got more than one IdList for {acc}\n{record['IdList']}\n{record}"
