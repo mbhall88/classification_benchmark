@@ -1,8 +1,10 @@
 import sys
+from dataclasses import dataclass
+from typing import Optional, List
 
 sys.stderr = open(snakemake.log[0], "w")
 
-from taxonomy import Taxonomy
+from taxonomy import Taxonomy, TaxonomyError
 from Bio import Entrez, SeqIO
 from pathlib import Path
 from functools import cache
@@ -47,6 +49,31 @@ def accession2taxid(acc: str) -> str:
         )
     taxid = record["IdList"][0]
     return taxid
+
+
+@dataclass
+class TaxonomyNode:
+    id: str
+    name: str
+    parent: Optional["TaxonomyNode"]
+    rank: str
+
+
+def fetch_taxonomy(taxid: str) -> List[TaxonomyNode]:
+    handle = Entrez.efetch(db="taxonomy", id=taxid)
+    record = Entrez.read(handle)[0]
+    lineage = []
+    prev_node = None
+    for lineage_info in record["LineageEx"]:
+        _id = lineage_info["TaxId"]
+        name = lineage_info["ScientificName"]
+        rank = lineage_info["Rank"]
+        parent = prev_node
+        node = TaxonomyNode(id=_id, name=name, rank=rank, parent=parent)
+        lineage.append(node)
+        prev_node = node
+
+    return lineage
 
 
 def is_header(s: str) -> bool:
@@ -102,7 +129,11 @@ def main():
 
                     row = [seqid, "", "", "", "", "", ""]
 
-                    lineage = taxtree.lineage(taxid)
+                    try:
+                        lineage = taxtree.lineage(taxid)
+                    except TaxonomyError:
+                        lineage = fetch_taxonomy(taxid)
+
                     for l in lineage:
                         if l.rank == "strain":
                             row[1] = l.id
