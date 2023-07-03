@@ -1,4 +1,5 @@
 import sys
+
 sys.stderr = open(snakemake.log[0], "w")
 
 from taxonomy import Taxonomy
@@ -73,6 +74,11 @@ def main():
         )
         for file in snakemake.input.refs:
             organism = Path(file).name.split(".")[0]
+            if organism == "library":
+                organism = Path(file).parts[-2].capitalize()
+                if organism == "Viral":
+                    organism = "Virus"
+
             with open(file) as fd_in:
                 for header in filter(is_header, fd_in):
                     seqid = header[1:].split()[0]
@@ -86,14 +92,13 @@ def main():
                         try:
                             taxid = accession2taxid(seqid)
                         except HTTPError as err:
-                            print(f"Failed to fetch taxid for {seqid} from {organism} {header}", file=sys.stderr)
+                            print(
+                                f"Failed to fetch taxid for {seqid} from {organism} {header}",
+                                file=sys.stderr,
+                            )
                             raise err
                     else:
-                        try:
-                            taxid = accession2taxid(seqid.split("|")[1])
-                        except HTTPError as err:
-                            print(f"Failed to fetch taxid for {seqid} from {organism} {header}", file=sys.stderr)
-                            raise err
+                        taxid = seqid.split("|")[1]
 
                     row = [seqid, "", "", "", "", "", ""]
 
