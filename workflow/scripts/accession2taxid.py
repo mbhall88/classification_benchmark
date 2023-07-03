@@ -36,8 +36,7 @@ MTB_ACCESSIONS = {
 
 @cache
 def accession2taxid(acc: str) -> str:
-    try:
-        handle = Entrez.efetch(db="nucleotide", id=acc, retmode="text", rettype="gb")
+    handle = Entrez.efetch(db="nucleotide", id=acc, retmode="text", rettype="gb")
     record = SeqIO.read(handle, "gb")
     handle = Entrez.esearch(db="taxonomy", term=record.annotations["organism"])
     record = Entrez.read(handle)
