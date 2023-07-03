@@ -5,6 +5,7 @@ from taxonomy import Taxonomy
 from Bio import Entrez, SeqIO
 from pathlib import Path
 from functools import cache
+from urllib.error import HTTPError
 
 Entrez.email = "michael.hall2@unimelb.edu.au"
 
@@ -35,7 +36,8 @@ MTB_ACCESSIONS = {
 
 @cache
 def accession2taxid(acc: str) -> str:
-    handle = Entrez.efetch(db="nucleotide", id=acc, retmode="text", rettype="gb")
+    try:
+        handle = Entrez.efetch(db="nucleotide", id=acc, retmode="text", rettype="gb")
     record = SeqIO.read(handle, "gb")
     handle = Entrez.esearch(db="taxonomy", term=record.annotations["organism"])
     record = Entrez.read(handle)
@@ -82,9 +84,17 @@ def main():
                     elif organism == "NTM":
                         if "|" in seqid:
                             seqid = seqid.split("|")[-1]
-                        taxid = accession2taxid(seqid)
+                        try:
+                            taxid = accession2taxid(seqid)
+                        except HTTPError as err:
+                            print(f"Failed to fetch taxid for {seqid} from {organism} {header}", file=sys.stderr)
+                            raise err
                     else:
-                        taxid = accession2taxid(seqid.split("|")[1])
+                        try:
+                            taxid = accession2taxid(seqid.split("|")[1])
+                        except HTTPError as err:
+                            print(f"Failed to fetch taxid for {seqid} from {organism} {header}", file=sys.stderr)
+                            raise err
 
                     row = [seqid, "", "", "", "", "", ""]
 
