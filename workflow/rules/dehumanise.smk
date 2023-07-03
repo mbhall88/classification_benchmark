@@ -51,22 +51,6 @@ rule minimap2_human_scrubber:
     shell:
         "minimap2 {params.opts} -t {threads} -o {output.aln} {input.ref} {input.reads} 2> {log}"
 
-rule minimap2_split_index_chm13:
-    input:
-        target=rules.minimap2_human_scrubber.input.ref,
-    output:
-        index=RESULTS / "dehumanise/minimap2/chm13v2.mmi"
-    log:
-        LOGS / "minimap2_split_index_chm13.split.log"
-    threads: 4
-    resources:
-        mem_mb=int(12 * GB),
-        runtime="30m"
-    container:
-        CONTAINERS["minimap2"]
-    params:
-        opts=""
-
 
 rule kraken_human_classify:
     input:
