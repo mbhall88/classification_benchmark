@@ -1,4 +1,5 @@
 import gzip
+import json
 import sys
 from dataclasses import dataclass
 from typing import Optional, List
@@ -6,10 +7,9 @@ from typing import Optional, List
 sys.stderr = open(snakemake.log[0], "w")
 
 from taxonomy import Taxonomy, TaxonomyError
-from Bio import Entrez, SeqIO
+from Bio import Entrez
 from pathlib import Path
 from functools import cache
-from urllib.error import HTTPError
 
 Entrez.email = "michael.hall2@unimelb.edu.au"
 
@@ -40,16 +40,13 @@ MTB_ACCESSIONS = {
 
 @cache
 def accession2taxid(acc: str) -> str:
-    handle = Entrez.efetch(db="nucleotide", id=acc, retmode="text", rettype="gb")
-    record = SeqIO.read(handle, "gb")
-    handle = Entrez.esearch(db="taxonomy", term=record.annotations["organism"])
-    record = handle.read()
-    if len(record["IdList"]) > 1:
-        raise ValueError(
-            f"Got more than one IdList for {acc}\n{record['IdList']}\n{record}"
-        )
-    taxid = record["IdList"][0]
-    return taxid
+    handle = Entrez.esearch(db="nucleotide", term=acc)
+    record = Entrez.read(handle)
+    gi = record["IdList"][0]
+    handle = Entrez.esummary(db="nucleotide", id=gi, retmode="json")
+    result = json.load(handle)["result"]
+    taxid = result[gi]["taxid"]
+    return str(taxid)
 
 
 @dataclass
