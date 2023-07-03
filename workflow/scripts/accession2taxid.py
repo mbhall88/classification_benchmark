@@ -1,3 +1,6 @@
+import sys
+sys.stderr = open(snakemake.log[0], "w")
+
 from taxonomy import Taxonomy
 from Bio import Entrez, SeqIO
 from pathlib import Path

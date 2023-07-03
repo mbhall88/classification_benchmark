@@ -11,6 +11,9 @@ rule accession2taxonomy:
         metadata=RESULTS / "assess/acc2tax.tsv",
     log:
         LOGS / "accession2taxonomy.log",
+    resources:
+        runtime="2h",
+        mem_mb=int(4 * GB),
     conda:
         ENVS / "accession2taxonomy.yaml"
     script:
