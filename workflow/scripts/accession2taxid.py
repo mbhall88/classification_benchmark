@@ -1,3 +1,4 @@
+import gzip
 import sys
 from dataclasses import dataclass
 from typing import Optional, List
@@ -106,7 +107,12 @@ def main():
                 if organism == "Viral":
                     organism = "Virus"
 
-            with open(file) as fd_in:
+            if file.endswith("gz"):
+                openf = gzip.open
+            else:
+                openf = open
+
+            with openf(file, mode="rt") as fd_in:
                 for header in filter(is_header, fd_in):
                     seqid = header[1:].split()[0]
                     if seqid in MTB_ACCESSIONS:
