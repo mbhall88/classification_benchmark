@@ -59,6 +59,28 @@ rule filter_bacteria_assemblies:
         SCRIPTS / "filter_bacteria_assemblies.py"
 
 
+rule filter_mycobacterial_assemblies:
+    input:
+        faidx=rules.index_kraken_bacteria_library.output.idx,
+        fasta=rules.index_kraken_bacteria_library.input.fasta,
+    output:
+        outdir=directory(RESULTS / "simulate/references/mycobacteria"),
+    log:
+        LOGS / "filter_mycobacterial_assemblies.log",
+    resources:
+        runtime="1h",
+        mem_mb=int(4 * GB),
+    container:
+        CONTAINERS["pysam"]
+    params:
+        min_length=50_000,
+        min_asm=1,
+        max_asm=1_000,
+        include=rules.filter_bacteria_assemblies.params.exclude,
+    script:
+        SCRIPTS / "filter_mycobacterial_assemblies.py"
+
+
 rule reduce_bacteria_assemblies:
     input:
         indir=rules.filter_bacteria_assemblies.output.outdir,
@@ -88,6 +110,34 @@ rule reduce_bacteria_assemblies:
         done
         """
 
+rule reduce_mycobacterial_assemblies:
+    input:
+        indir=rules.filter_mycobacterial_assemblies.output.outdir,
+        script=SCRIPTS / "dereplicator.py",
+    output:
+        outdir=directory(RESULTS / "simulate/references/refined_mycobacteria"),
+    log:
+        LOGS / "reduce_mycobacterial_assemblies.log",
+    threads: 8
+    resources:
+        runtime="2h",
+        mem_mb=int(8 * GB),
+    conda:
+        ENVS / "derep.yaml"
+    params:
+        opts="-d 0.001",
+    shell:
+        """
+        exec &> {log}
+        for dir in {input.indir}/*/
+        do
+            dir=${{dir%/}}
+            genus=${{dir##*/}}
+            echo "Dereplicating $genus"
+            outdir={output.outdir}/$genus
+            python {input.script} {params.opts} --threads {threads} $dir $outdir
+        done
+        """
 
 rule combine_bacteria_assemblies:
     input:
@@ -104,6 +154,20 @@ rule combine_bacteria_assemblies:
     shell:
         "fd -e fa -X gzip -c \; . {input.asmdir} 2> {log} > {output.fasta}"
 
+rule combine_mycobacterial_assemblies:
+    input:
+        asmdir=rules.reduce_mycobacterial_assemblies.output.outdir,
+    output:
+        fasta=RESULTS / "simulate/references/Mycobacteria.fa.gz",
+    log:
+        LOGS / "combine_mycobacterial_assemblies.log",
+    resources:
+        mem_mb=GB,
+        runtime="30m",
+    container:
+        CONTAINERS["rs_utils"]
+    shell:
+        "fd -e fa -X gzip -c \; . {input.asmdir} 2> {log} > {output.fasta}"
 
 def simulate_options(wildcards):
     opts = []
@@ -137,20 +201,20 @@ def calculate_total_bases(wildcards):
     return n_bases * prop
 
 
-def infer_simulate_input(wildcards):
-    if wildcards.read_type == "Unmapped":
+def infer_simulate_input(read_type):
+    if read_type == "Unmapped":
         # just pick smallest fasta as we wont actually take sequences from it
         return str(RESULTS / "simulate/references/TB.fa.gz")
-    elif wildcards.read_type in ("NTM", "TB", "Bacteria"):
-        return str(RESULTS / f"simulate/references/{wildcards.read_type}.fa.gz")
-    elif wildcards.read_type == "Human":
+    elif read_type in ("NTM", "TB", "Bacteria"):
+        return str(RESULTS / f"simulate/references/{read_type}.fa.gz")
+    elif read_type == "Human":
         return str(
-            RESULTS / f"kraken/db/library/{wildcards.read_type.lower()}/library.fna"
+            RESULTS / f"kraken/db/library/{read_type.lower()}/library.fna"
         )
-    elif wildcards.read_type == "Virus":
+    elif read_type == "Virus":
         return str(RESULTS / f"kraken/db/library/viral/library.fna")
     else:
-        raise NotImplementedError(f"Don't know what reference for {wildcards.read_type}")
+        raise NotImplementedError(f"Don't know what reference for {read_type}")
 
 
 simulate_mem = {
@@ -165,7 +229,7 @@ simulate_mem = {
 
 rule simulate_nanopore_reads:
     input:
-        reference=infer_simulate_input,
+        reference=lambda wildcards: infer_simulate_input(wildcards.read_type),
     output:
         fastq=RESULTS / "simulate/reads/{read_type}.ont.fq.gz",
     log:

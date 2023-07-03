@@ -40,6 +40,8 @@ target_files.add(RESULTS / "simulate/reads/metagenome.ont.fq.gz")
 target_files.add(RESULTS / "db/minimap2/db.fa.gz.map-ont.mmi")
 target_files.add(RESULTS / "dehumanise/minimap2/metagenome.aln.ont.paf")
 target_files.add(RESULTS / "dehumanise/sra/metagenome.scrubbed.ont.fq.gz")
+target_files.add(RESULTS / "simulate/references/Mycobacteria.fa.gz")
+target_files.add(RESULTS / "assess/acc2tax.tsv")
 
 
 localrules:
@@ -54,3 +56,4 @@ rule all:
 include: RULES / "db.smk"
 include: RULES / "simulate.smk"
 include: RULES / "dehumanise.smk"
+include: RULES / "assess.smk"
