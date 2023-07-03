@@ -52,7 +52,8 @@ def is_header(s: str) -> bool:
 
 
 def main():
-    taxtree = Taxonomy.from_ncbi(Path(snakemake.input.nodes).parent)
+    taxdir = str(Path(snakemake.input.nodes).parent)
+    taxtree = Taxonomy.from_ncbi(taxdir)
 
     with open(snakemake.output.metadata, "w") as fd_out:
         print(
