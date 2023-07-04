@@ -1,6 +1,6 @@
 rule sra_human_scrubber:
     input:
-        reads=rules.combine_simulated_reads.output.reads,
+        reads=rules.filter_simulated_reads.output.fastq,
     output:
         reads=RESULTS / "dehumanise/sra/metagenome.scrubbed.ont.fq.gz",
         removed=RESULTS / "dehumanise/sra/metagenome.removed.ont.fq.gz",

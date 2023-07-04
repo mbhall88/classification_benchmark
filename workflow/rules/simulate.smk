@@ -296,3 +296,20 @@ rule combine_simulated_reads:
         runtime="5m",
     shell:
         "cat {input.fastqs} > {output.reads} 2> {log}"
+
+
+rule filter_simulated_reads:
+    input:
+        fastq=rules.combine_simulated_reads.output.reads
+    output:
+        fastq=RESULTS / "simulate/reads/metagenome.ont.filtered.fq.gz"
+    log:
+        LOGS / "filter_simulated_reads.log"
+    resources:
+        runtime="10m"
+    container:
+        CONTAINERS["nanoq"]
+    params:
+        opts="--min-len 500"
+    shell:
+        "nanoq {params.opts} -i {input.fastq} -o {output.fastq} 2> {log}"

@@ -22,6 +22,7 @@ containers:
   badread: "docker://quay.io/biocontainers/badread:0.4.0--pyhdfd78af_1"
   rs_utils: "docker://quay.io/mbhall88/rs-utils:0.1.0"
   sra_human_scrubber: "docker://ncbi/sra-human-scrubber:2.1.0"
+  nanoq: "docker://quay.io/biocontainers/nanoq:0.10.0--h031d066_2"
 
 ancestral_genome:
   url: "https://zenodo.org/record/3497110/files/MTB_ancestor_reference.fasta"
