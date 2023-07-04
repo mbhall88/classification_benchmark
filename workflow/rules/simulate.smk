@@ -4,7 +4,7 @@ rule separate_db_by_organism:
         fasta=rules.faidx_db.output.fasta,
         faidx=rules.faidx_db.output.faidx,
     output:
-        refs=[RESULTS / f"simulate/references/{org}.fa.gz" for org in ["NTM", "TB"]],
+        refs=[RESULTS / f"simulate/references/{org}.fa.gz" for org in ["TB"]],
     log:
         LOGS / "separate_db_by_organism.log",
     resources:
@@ -110,6 +110,7 @@ rule reduce_bacteria_assemblies:
         done
         """
 
+
 rule reduce_mycobacterial_assemblies:
     input:
         indir=rules.filter_mycobacterial_assemblies.output.outdir,
@@ -139,6 +140,7 @@ rule reduce_mycobacterial_assemblies:
         done
         """
 
+
 rule combine_bacteria_assemblies:
     input:
         asmdir=rules.reduce_bacteria_assemblies.output.outdir,
@@ -153,6 +155,7 @@ rule combine_bacteria_assemblies:
         CONTAINERS["rs_utils"]
     shell:
         "fd -e fa -X gzip -c \; . {input.asmdir} 2> {log} > {output.fasta}"
+
 
 rule combine_mycobacterial_assemblies:
     input:
@@ -169,6 +172,27 @@ rule combine_mycobacterial_assemblies:
     shell:
         "fd -e fa -X gzip -c \; . {input.asmdir} 2> {log} > {output.fasta}"
 
+
+rule split_mycobacteria:
+    input:
+        fasta=rules.combine_mycobacterial_assemblies.output.fasta,
+        nodes=rules.download_kraken_taxonomy.output.nodes,
+        tb_asm=RESULTS / f"simulate/references/TB.fa.gz",
+        lineage_info=CONFIG / "mtb_gramtools_lineages.csv",
+    output:
+        ntm_fasta=RESULTS / "simulate/references/NTM.fa.gz",
+        mtbc_fasta=RESULTS / "simulate/references/MTBC.fa.gz",
+    log:
+        LOGS / "split_mycobacteria.log",
+    resources:
+        runtime="20m",
+        mem_mb=int(2 * GB),
+    conda:
+        ENVS / "split_mycobacteria.yaml"
+    script:
+        SCRIPTS / "split_mycobacteria.py"
+
+
 def simulate_options(wildcards):
     opts = []
     if wildcards.read_type == "Unmapped":
@@ -183,7 +207,7 @@ def simulate_options(wildcards):
     opts.append(f"--random_reads {random_reads}")
     opts.append(f"--chimeras {chimera}")
 
-    if wildcards.read_type in ("NTM", "TB", "Virus"):
+    if wildcards.read_type in ("NTM", "MTBC", "Virus"):
         length = "4000,3000"
         opts.append(f"--length {length}")
 
@@ -204,13 +228,11 @@ def calculate_total_bases(wildcards):
 def infer_simulate_input(read_type):
     if read_type == "Unmapped":
         # just pick smallest fasta as we wont actually take sequences from it
-        return str(RESULTS / "simulate/references/TB.fa.gz")
-    elif read_type in ("NTM", "TB", "Bacteria"):
+        return str(RESULTS / "simulate/references/MTBC.fa.gz")
+    elif read_type in ("NTM", "MTBC", "Bacteria"):
         return str(RESULTS / f"simulate/references/{read_type}.fa.gz")
     elif read_type == "Human":
-        return str(
-            RESULTS / f"kraken/db/library/{read_type.lower()}/library.fna"
-        )
+        return str(RESULTS / f"kraken/db/library/{read_type.lower()}/library.fna")
     elif read_type == "Virus":
         return str(RESULTS / f"kraken/db/library/viral/library.fna")
     else:
@@ -221,7 +243,7 @@ simulate_mem = {
     "Bacteria": 128 * GB,
     "Human": 128 * GB,
     "Virus": 16 * GB,
-    "TB": 4 * GB,
+    "MTBC": 4 * GB,
     "NTM": 4 * GB,
     "Unmapped": 4 * GB,
 }

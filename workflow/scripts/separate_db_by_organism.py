@@ -1,11 +1,15 @@
 import sys
+
 sys.stderr = open(snakemake.log[0], "w")
 from pathlib import Path
 from pysam import FastaFile
 import gzip
 from collections import Counter, defaultdict
+
+
 def eprint(msg):
     print(msg, file=sys.stderr)
+
 
 def invert_dict(d: dict) -> dict:
     d_inv = defaultdict(list)
@@ -13,6 +17,7 @@ def invert_dict(d: dict) -> dict:
         d_inv[v].append(k)
 
     return d_inv
+
 
 def load_metadata(path: str) -> dict[str, list[str]]:
     """Maps organism->list of reference names"""
@@ -29,6 +34,7 @@ def load_metadata(path: str) -> dict[str, list[str]]:
     eprint(f"Got the following organism group counts:\n{Counter(organism)}")
     eprint(f"Loaded {len(metadata)} sequences from reference")
     return invert_dict(metadata)
+
 
 def main():
     fa_reader = FastaFile(snakemake.input.fasta)
@@ -56,9 +62,6 @@ def main():
                 print(seq, file=fd_out)
 
     eprint("Finished")
-
-
-
 
 
 main()

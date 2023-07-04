@@ -10,32 +10,14 @@ from taxonomy import Taxonomy, TaxonomyError
 from Bio import Entrez
 from pathlib import Path
 from functools import cache
+import re
 
 Entrez.email = "michael.hall2@unimelb.edu.au"
 
 DELIM = "\t"
 MTB_TAXID = "1773"
 HUMAN_TAXID = "9606"
-MTB_ACCESSIONS = {
-    "MTB_an",
-    "N000",
-    "N003",
-    "N005",
-    "N005",
-    "N007",
-    "N009",
-    "N013",
-    "N014",
-    "N015",
-    "N015",
-    "N015",
-    "N117",
-    "N117",
-    "N120",
-    "N121",
-    "N127",
-    "N128",
-}
+TAXID_REGEX = re.compile(r"taxid=(?P<id>\d+)")
 
 
 @cache
@@ -112,21 +94,11 @@ def main():
             with openf(file, mode="rt") as fd_in:
                 for header in filter(is_header, fd_in):
                     seqid = header[1:].split()[0]
-                    if seqid in MTB_ACCESSIONS:
-                        taxid = MTB_TAXID
+                    taxid_match = TAXID_REGEX.search(header)
+                    if taxid_match:
+                        taxid = taxid_match.group("id")
                     elif organism == "Human":
                         taxid = HUMAN_TAXID
-                    elif organism == "NTM":
-                        if "|" in seqid:
-                            seqid = seqid.split("|")[-1]
-                        try:
-                            taxid = accession2taxid(seqid)
-                        except Exception as err:
-                            print(
-                                f"Failed to fetch taxid ({taxid}) for {seqid} from {organism} {header}",
-                                file=sys.stderr,
-                            )
-                            raise err
                     else:
                         taxid = seqid.split("|")[1]
 

@@ -7,6 +7,7 @@ configfile: "config/config.yaml"
 
 
 WORKFLOW = Path("workflow").resolve()
+CONFIG = Path("config").resolve()
 RULES = WORKFLOW / "rules"
 ENVS = WORKFLOW / "envs"
 SCRIPTS = WORKFLOW / "scripts"
@@ -18,7 +19,7 @@ RESOURCES = Path("resources").resolve()
 GB = 1_000
 
 gramtools_lineages = pd.read_csv(config["gramtools_lineages"])
-GRAMTOOLS_SAMPLES = sorted(list(gramtools_lineages["identifier"]))
+GRAMTOOLS_SAMPLES = sorted(list(gramtools_lineages["strain"]))
 
 target_files = set()
 for size in config["kraken_db_size"]:

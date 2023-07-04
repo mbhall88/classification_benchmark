@@ -41,4 +41,4 @@ simulate:
     Virus: 0.01
     Bacteria: 0.41
     NTM: 0.01
-    TB: 0.05
+    MTBC: 0.05
