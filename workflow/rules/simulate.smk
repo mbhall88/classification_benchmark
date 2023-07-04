@@ -185,7 +185,7 @@ rule split_mycobacteria:
     log:
         LOGS / "split_mycobacteria.log",
     resources:
-        runtime="20m",
+        runtime="1h",
         mem_mb=int(2 * GB),
     conda:
         ENVS / "split_mycobacteria.yaml"
