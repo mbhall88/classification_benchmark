@@ -244,7 +244,7 @@ simulate_mem = {
     "Human": 128 * GB,
     "Virus": 16 * GB,
     "MTBC": 8 * GB,
-    "NTM": 16 * GB,
+    "NTM": 32 * GB,
     "Unmapped": 4 * GB,
 }
 
