@@ -245,7 +245,7 @@ simulate_mem = {
     "Virus": 16 * GB,
     "MTBC": 8 * GB,
     "NTM": 32 * GB,
-    "Unmapped": 4 * GB,
+    "Unmapped": 8 * GB,
 }
 
 
@@ -306,7 +306,7 @@ rule filter_simulated_reads:
     log:
         LOGS / "filter_simulated_reads.log"
     resources:
-        runtime="10m"
+        runtime="30m"
     container:
         CONTAINERS["nanoq"]
     params:
