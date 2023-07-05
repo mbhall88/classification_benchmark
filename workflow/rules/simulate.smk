@@ -293,23 +293,10 @@ rule combine_simulated_reads:
     log:
         LOGS / "combine_simulated_reads.log",
     resources:
-        runtime="5m",
-    shell:
-        "cat {input.fastqs} > {output.reads} 2> {log}"
-
-
-rule filter_simulated_reads:
-    input:
-        fastq=rules.combine_simulated_reads.output.reads
-    output:
-        fastq=RESULTS / "simulate/reads/metagenome.ont.filtered.fq.gz"
-    log:
-        LOGS / "filter_simulated_reads.log"
-    resources:
-        runtime="30m"
+        runtime="30m",
     container:
         CONTAINERS["seqtk"]
     params:
-        opts="-L 500"
+        opts="-L 500",
     shell:
-        "(seqtk seq {params.opts} {input.fastq} | gzip) > {output.fastq} 2> {log}"
+        "(zcat {input.fastqs} | seqtk seq {params.opts} - | gzip) > {output.reads} 2> {log}"
