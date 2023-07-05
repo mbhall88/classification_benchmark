@@ -308,8 +308,8 @@ rule filter_simulated_reads:
     resources:
         runtime="30m"
     container:
-        CONTAINERS["nanoq"]
+        CONTAINERS["seqtk"]
     params:
-        opts="--min-len 500"
+        opts="-L 500"
     shell:
-        "nanoq {params.opts} -i {input.fastq} -o {output.fastq} 2> {log}"
+        "(seqtk seq {params.opts} {input.fastq} | gzip) > {output.fastq} 2> {log}"
