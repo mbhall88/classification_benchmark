@@ -23,6 +23,7 @@ rule accession2taxonomy:
 rule make_read_truth:
     input:
         acc2tax=rules.accession2taxonomy.output.metadata,
+        nodes=rules.download_kraken_taxonomy.output.nodes,
         reads=rules.combine_simulated_reads.output.reads,
     output:
         metadata=RESULTS / "assess/read2taxonomy.tsv",
@@ -30,8 +31,8 @@ rule make_read_truth:
         LOGS / "make_read_truth.log",
     resources:
         runtime="2h",
-    container:
-        CONTAINERS["pysam"]
+    conda:
+        ENVS / "make_read_truth.yaml"
     script:
         SCRIPTS / "make_read_truth.py"
 

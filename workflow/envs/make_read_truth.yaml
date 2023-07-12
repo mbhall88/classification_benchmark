@@ -1,0 +1,10 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.10
+  - pysam
+  - biopython=1.81
+  - pip
+  - pip:
+      - taxonomy==0.10.0
