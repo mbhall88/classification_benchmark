@@ -47,7 +47,7 @@ rule minimap2_human_scrubber:
     container:
         CONTAINERS["minimap2"]
     params:
-        opts="-x map-ont -y --paf-no-hit",
+        opts="-x map-ont --paf-no-hit",
     shell:
         "minimap2 {params.opts} -t {threads} -o {output.aln} {input.ref} {input.reads} 2> {log}"
 

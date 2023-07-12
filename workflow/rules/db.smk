@@ -355,6 +355,7 @@ rule download_chm13:
     container:
         CONTAINERS["base"]
     params:
-        url="https://s3-us-west-2.amazonaws.com/human-pangenomics/T2T/CHM13/assemblies/analysis_set/chm13v2.0.fa.gz",
+        # chm13 plus HLA taken from https://github.com/bede/hostile
+        url="https://objectstorage.uk-london-1.oraclecloud.com/n/lrbvkel2wjot/b/human-genome-bucket/o/human-t2t-hla.fa.gz",
     shell:
         "wget {params.url} -O {output.fasta} 2> {log}"
