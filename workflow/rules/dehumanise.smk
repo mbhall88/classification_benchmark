@@ -63,8 +63,8 @@ rule kraken_human_classify:
         LOGS / "kraken_human_classify/k{k}l{l}/ont.log",
     threads: 4
     resources:
-        mem_mb=lambda wildcards, attempt: attempt * int(8 * GB),
-        runtime="1h",
+        mem_mb=lambda wildcards, attempt: attempt * int(4 * GB),
+        runtime="20m",
     benchmark:
         BENCH / "dehumanise/kraken/k{k}l{l}/ont.tsv"
     container:
