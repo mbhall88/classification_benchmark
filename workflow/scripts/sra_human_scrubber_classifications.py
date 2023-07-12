@@ -21,6 +21,7 @@ COLUMNS = [
     "genus",
 ]
 
+
 def classify_kept(read_id, truth) -> str:
     species_id = truth.get(read_id, dict()).get("species_id")
     if species_id is None:
@@ -44,9 +45,6 @@ def classify_scrubbed(read_id, truth) -> str:
 
 
 def main():
-    with pysam.FastxFile(snakemake.input.all_reads) as fh:
-        read_ids = {entry.name for entry in fh}
-
     truth = dict()
     with open(snakemake.input.truth, newline="") as fd:
         reader = csv.DictReader(fd, delimiter="\t")
@@ -72,19 +70,18 @@ def main():
                         f"Seen {entry.name} multiple times in scrubbed reads"
                     )
                 if entry.name in kept:
-                    raise ValueError(
-                        f"Seen {entry.name} in scrubbed and kept reads"
-                    )
+                    raise ValueError(f"Seen {entry.name} in scrubbed and kept reads")
                 scrubbed.add(entry.name)
                 clf = classify_scrubbed(entry.name, truth)
                 print(f"{entry.name}{DELIM}{clf}", file=fd_out)
 
+    read_ids = set(truth.keys())
     seen_read_ids = kept.intersection(scrubbed)
 
     if seen_read_ids != read_ids:
         diff = seen_read_ids.symmetric_difference(read_ids)
         raise ValueError(
-            f"These read IDs were not found in both the input and output\n{diff}"
+            f"{len(read_ids)} reads in truth and {len(seen_read_ids)} in output. These read IDs were not found in both the input and output\n{diff}"
         )
 
 
