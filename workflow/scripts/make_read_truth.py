@@ -1,7 +1,8 @@
 import csv
 import sys
 from dataclasses import dataclass
-from typing import Optional
+from functools import cache
+from typing import Optional, List
 
 from Bio import Entrez
 
@@ -31,6 +32,7 @@ class TaxonomyNode:
     rank: str
 
 
+@cache
 def fetch_taxonomy(taxid: str) -> List[TaxonomyNode]:
     handle = Entrez.efetch(db="taxonomy", id=taxid)
     record = Entrez.read(handle)[0]

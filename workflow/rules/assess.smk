@@ -42,7 +42,7 @@ rule sra_human_scrubber_classifications:
         all_reads=rules.sra_human_scrubber.input.reads,
         reads=rules.sra_human_scrubber.output.reads,
         removed=rules.sra_human_scrubber.output.removed,
-        truth=rules.accession2taxonomy.output.metadata,
+        truth=rules.make_read_truth.output.metadata,
     output:
         classification=RESULTS / "dehumanise/classifications.sra.tsv",
     log:
