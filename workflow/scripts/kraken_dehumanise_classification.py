@@ -44,13 +44,13 @@ def main():
                 read_is_human = read_tax["species_id"] == HUMAN_SPECIES_ID
                 taxid = fields[2]
 
-                if read_is_human:
-                    if taxid == HUMAN_SPECIES_ID:
+                if taxid == HUMAN_SPECIES_ID:
+                    if read_is_human:
                         clf = TP
                     else:
                         clf = FP
                 else:
-                    if taxid == HUMAN_SPECIES_ID:
+                    if read_is_human:
                         clf = FN
                     else:
                         clf = TN
