@@ -105,5 +105,5 @@ rule miniwinnow_human_scrubber:
         meryl count k=15 output merylDB {input.ref}
         meryl print greater-than distinct=0.9998 merylDB > repetitive_k15.txt
         awk -F'\t' '$5=="*"' | cut -f1 | seqkit grep -f - {input.reads} | \
-        winnowmap {params.opts} -W repetitive_k15.txt -t {threads} -o {output.aln} {input.ref} 
+        winnowmap {params.opts} -W repetitive_k15.txt -t {threads} -o {output.aln} {input.ref} -
         """
