@@ -120,6 +120,8 @@ rule hostile_human_scrubber:
         mem_mb=int(14 * GB),
         runtime="30m",
     threads: 4
+    shadow:
+        "shallow"
     benchmark:
         BENCH / "dehumanise/hostile/ont.tsv"
     container:
