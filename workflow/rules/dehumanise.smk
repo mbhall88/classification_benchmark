@@ -107,3 +107,25 @@ rule miniwinnow_human_scrubber:
         awk -F'\t' '$5=="*"' {input.aln} | cut -f1 | seqkit grep -f - {input.reads} | \
         winnowmap {params.opts} -W repetitive_k15.txt -t {threads} -o {output.aln} {input.ref} -
         """
+
+
+rule hostile_human_scrubber:
+    input:
+        reads=rules.sra_human_scrubber.input.reads,
+    output:
+        reads=RESULTS / "dehumanise/hostile/metagenome.ont.clean.fastq.gz",
+    log:
+        LOGS / "hostile_human_scrubber.log",
+    resources:
+        mem_mb=int(14 * GB),
+        runtime="30m",
+    threads: 4
+    benchmark:
+        BENCH / "dehumanise/hostile/ont.tsv"
+    container:
+        CONTAINERS["hostile"]
+    params:
+        opts="--aligner minimap2 --force",
+        outdir=lambda wildcards, output: Path(output.reads).parent,
+    shell:
+        "hostile clean {params.opts} --threads {threads} --fastq1 {input.reads} &> {log}"

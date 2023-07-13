@@ -84,3 +84,18 @@ rule kraken_dehumanise_classification:
         CONTAINERS["python"]
     script:
         SCRIPTS / "kraken_dehumanise_classification.py"
+
+rule miniwinnow_dehumanise_classification:
+    input:
+        truth=rules.make_read_truth.output.metadata,
+        alignment=rules.miniwinnow_human_scrubber.output.aln,
+    output:
+        classification=RESULTS / "dehumanise/classifications.miniwinnow.tsv",
+    log:
+        LOGS / "miniwinnow_dehumanise_classification.log",
+    resources:
+        runtime="=10m",
+    conda:
+        ENVS / "minimap2_dehumanise_classification.yaml"
+    script:
+        SCRIPTS / "miniwinnow_dehumanise_classification.py"
