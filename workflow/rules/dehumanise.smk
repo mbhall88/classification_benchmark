@@ -130,4 +130,4 @@ rule hostile_human_scrubber:
         opts="--aligner minimap2 --force",
         outdir=lambda wildcards, output: Path(output.reads).parent,
     shell:
-        "hostile clean {params.opts} --threads {threads} --fastq1 {input.reads} &> {log}"
+        "hostile clean {params.opts} --out-dir {params.outdir} --threads {threads} --fastq1 {input.reads} &> {log}"
