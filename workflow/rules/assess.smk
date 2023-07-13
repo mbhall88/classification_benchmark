@@ -94,7 +94,7 @@ rule miniwinnow_dehumanise_classification:
     log:
         LOGS / "miniwinnow_dehumanise_classification.log",
     resources:
-        runtime="=10m",
+        runtime="10m",
     conda:
         ENVS / "minimap2_dehumanise_classification.yaml"
     script:
