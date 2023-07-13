@@ -118,7 +118,7 @@ rule hostile_human_scrubber:
         LOGS / "hostile_human_scrubber.log",
     resources:
         mem_mb=int(14 * GB),
-        runtime="30m",
+        runtime="1h",
     threads: 4
     shadow:
         "shallow"
