@@ -76,3 +76,34 @@ rule kraken_human_classify:
         kraken2 {params.opts} --threads {threads} --db {input.db} --report {output.report} \
             --output {output.out} {input.reads} 2> {log}
         """
+
+
+rule miniwinnow_human_scrubber:
+    input:
+        reads=rules.sra_human_scrubber.input.reads,
+        ref=rules.download_chm13.output.fasta,
+        aln=rules.minimap2_human_scrubber.output.aln,
+    output:
+        aln=RESULTS / "dehumanise/miniwinnow/metagenome.aln.ont.paf",
+    log:
+        LOGS / "miniwinnow_human_scrubber.log",
+    threads: 4
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * int(16 * GB),
+        runtime="30m",
+    benchmark:
+        BENCH / "dehumanise/miniwinnow/ont.tsv"
+    conda:
+        ENVS / "miniwinnow.yaml"
+    shadow:
+        "shallow"
+    params:
+        opts="-x map-ont",
+    shell:
+        """
+        exec 2> {log}
+        meryl count k=15 output merylDB {input.ref}
+        meryl print greater-than distinct=0.9998 merylDB > repetitive_k15.txt
+        awk -F'\t' '$5=="*"' | cut -f1 | seqkit grep -f - {input.reads} | \
+        winnowmap {params.opts} -W repetitive_k15.txt -t {threads} -o {output.aln} {input.ref} 
+        """
