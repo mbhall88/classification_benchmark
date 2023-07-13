@@ -40,7 +40,7 @@ target_files.add(RESULTS / "dehumanise/sra/metagenome.scrubbed.ont.fq.gz")
 target_files.add(RESULTS / "dehumanise/classifications.minimap2.tsv")
 target_files.add(RESULTS / "dehumanise/classifications.sra.tsv")
 target_files.add(RESULTS / "dehumanise/classifications.miniwinnow.tsv")
-target_files.add(RESULTS / "dehumanise/hostile/metagenome.ont.clean.fastq.gz")
+target_files.add(RESULTS / "dehumanise/classifications.hostile.tsv")
 
 
 localrules:

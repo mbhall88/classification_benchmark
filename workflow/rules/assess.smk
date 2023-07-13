@@ -73,7 +73,7 @@ rule minimap2_dehumanise_classification:
 rule kraken_dehumanise_classification:
     input:
         truth=rules.make_read_truth.output.metadata,
-        classification=rules.kraken_human_classify.output.out
+        classification=rules.kraken_human_classify.output.out,
     output:
         classification=RESULTS / "dehumanise/classifications.kraken.k{k}l{l}.tsv",
     log:
@@ -84,6 +84,7 @@ rule kraken_dehumanise_classification:
         CONTAINERS["python"]
     script:
         SCRIPTS / "kraken_dehumanise_classification.py"
+
 
 rule miniwinnow_dehumanise_classification:
     input:
@@ -99,3 +100,19 @@ rule miniwinnow_dehumanise_classification:
         ENVS / "minimap2_dehumanise_classification.yaml"
     script:
         SCRIPTS / "miniwinnow_dehumanise_classification.py"
+
+
+rule hostile_human_scrubber_classifications:
+    input:
+        reads=rules.hostile_human_scrubber.output.reads,
+        truth=rules.make_read_truth.output.metadata,
+    output:
+        classification=RESULTS / "dehumanise/classifications.hostile.tsv",
+    log:
+        LOGS / "hostile_human_scrubber_classifications.log",
+    resources:
+        runtime="10m",
+    container:
+        CONTAINERS["pysam"]
+    script:
+        SCRIPTS / "hostile_human_scrubber_classifications.py"
