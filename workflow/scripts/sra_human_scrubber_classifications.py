@@ -76,7 +76,7 @@ def main():
                 print(f"{entry.name}{DELIM}{clf}", file=fd_out)
 
     read_ids = set(truth.keys())
-    seen_read_ids = kept.intersection(scrubbed)
+    seen_read_ids = kept.union(scrubbed)
 
     if seen_read_ids != read_ids:
         diff = seen_read_ids.symmetric_difference(read_ids)
