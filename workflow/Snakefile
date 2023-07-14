@@ -36,11 +36,7 @@ for lib in kraken_libs:
 
 
 target_files.add(RESULTS / "db/minimap2/db.fa.gz.map-ont.mmi")
-target_files.add(RESULTS / "dehumanise/sra/metagenome.scrubbed.ont.fq.gz")
-target_files.add(RESULTS / "dehumanise/classifications.minimap2.tsv")
-target_files.add(RESULTS / "dehumanise/classifications.sra.tsv")
-target_files.add(RESULTS / "dehumanise/classifications.miniwinnow.tsv")
-target_files.add(RESULTS / "dehumanise/classifications.hostile.tsv")
+target_files.add(RESULTS / "dehumanise/summary.csv")
 
 
 localrules:

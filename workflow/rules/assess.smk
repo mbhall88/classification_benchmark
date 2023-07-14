@@ -133,11 +133,11 @@ rule dehumanise_summary_statistics:
             ]
         ],
     output:
-        summary=RESULTS / "dehumanise/summary.csv"
+        summary=RESULTS / "dehumanise/summary.csv",
     log:
-        LOGS / "dehumanise_summary_statistics.log"
+        LOGS / "dehumanise_summary_statistics.log",
     resources:
-        runtime="5m"
+        runtime="5m",
     conda:
         ENVS / "datasci.yaml"
     script:
