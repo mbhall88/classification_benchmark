@@ -288,15 +288,17 @@ rule combine_simulated_reads:
             RESULTS / f"simulate/reads/{read_type}.ont.fq.gz"
             for read_type in config["simulate"]["proportions"]
         ],
+        script=SCRIPTS / "filter_ambig.py"
     output:
         reads=RESULTS / "simulate/reads/metagenome.ont.fq.gz",
     log:
         LOGS / "combine_simulated_reads.log",
     resources:
         runtime="30m",
-    container:
-        CONTAINERS["seqtk"]
+    conda:
+        ENVS / "combine_simulated_reads.yaml"
     params:
         opts="-L 500",
+        max_ambig=0.5
     shell:
-        "(zcat {input.fastqs} | seqtk seq {params.opts} - | gzip) > {output.reads} 2> {log}"
+        "(zcat {input.fastqs} | seqtk seq {params.opts} - | python {input.script} - {params.max_ambig} | gzip) > {output.reads} 2> {log}"
