@@ -98,7 +98,7 @@ rule miniwinnow_human_scrubber:
     shadow:
         "shallow"
     params:
-        opts="-x map-ont",
+        opts="-x map-ont --paf-no-hit",
     shell:
         """
         exec 2> {log}
