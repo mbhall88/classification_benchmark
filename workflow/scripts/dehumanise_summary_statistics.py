@@ -52,7 +52,7 @@ def main():
             file=fd_out,
         )
         for tool, counts in data.items():
-            res = summary(counts)
+            res = list(map(str, summary(counts)))
             print(DELIM.join([tool, *res]), file=fd_out)
 
 
