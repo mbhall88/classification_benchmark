@@ -17,7 +17,7 @@ def main():
         for read in fh:
             if ambig_prop(read.sequence) > max_ambig:
                 continue
-            sys.stdout.write(str(read))
+            print(str(read))
 
 
 if __name__ == "__main__":
