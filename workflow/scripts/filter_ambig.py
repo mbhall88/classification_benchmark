@@ -3,7 +3,7 @@ import sys
 
 
 def ambig_prop(seq: str) -> float:
-    n_acgt = sum(1 for c in seq if c.upper() not in ("ACGT"))
+    n_acgt = sum(1 for c in seq if c.upper() not in "ACGT")
     return n_acgt / len(seq)
 
 
