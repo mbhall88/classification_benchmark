@@ -1,3 +1,5 @@
+REPEAT = 5
+
 rule sra_human_scrubber:
     input:
         reads=rules.combine_simulated_reads.output.reads,
@@ -11,7 +13,7 @@ rule sra_human_scrubber:
         mem_mb=lambda wildcards, attempt: attempt * int(16 * GB),
         runtime="1h",
     benchmark:
-        BENCH / "dehumanise/sra/ont.tsv"
+        repeat(BENCH / "dehumanise/sra/ont.tsv", REPEAT)
     container:
         CONTAINERS["sra_human_scrubber"]
     params:
@@ -43,7 +45,7 @@ rule minimap2_human_scrubber:
         mem_mb=lambda wildcards, attempt: attempt * int(12 * GB),
         runtime="30m",
     benchmark:
-        BENCH / "dehumanise/minimap2/ont.tsv"
+        repeat(BENCH / "dehumanise/minimap2/ont.tsv", REPEAT)
     container:
         CONTAINERS["minimap2"]
     params:
@@ -66,7 +68,7 @@ rule kraken_human_classify:
         mem_mb=lambda wildcards, attempt: attempt * int(6 * GB),
         runtime=lambda wildcards, attempt: f"{30 * attempt}m",
     benchmark:
-        BENCH / "dehumanise/kraken/k{k}l{l}/ont.tsv"
+        repeat(BENCH / "dehumanise/kraken/k{k}l{l}/ont.tsv", REPEAT)
     container:
         CONTAINERS["kraken"]
     params:
@@ -92,7 +94,7 @@ rule miniwinnow_human_scrubber:
         mem_mb=lambda wildcards, attempt: attempt * int(16 * GB),
         runtime="30m",
     benchmark:
-        BENCH / "dehumanise/miniwinnow/ont.tsv"
+        repeat(BENCH / "dehumanise/miniwinnow/ont.tsv", REPEAT)
     conda:
         ENVS / "miniwinnow.yaml"
     shadow:
@@ -123,7 +125,7 @@ rule hostile_human_scrubber:
     shadow:
         "shallow"
     benchmark:
-        BENCH / "dehumanise/hostile/ont.tsv"
+        repeat(BENCH / "dehumanise/hostile/ont.tsv", REPEAT)
     container:
         CONTAINERS["hostile"]
     params:
