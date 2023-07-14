@@ -14,9 +14,9 @@ def summary(counts: Counter) -> tuple[int, int, int, int, float, float, float]:
     fps = counts["FP"]
     tns = counts["TN"]
 
-    precision = round(tps / (tps + fps), 4)
-    sn = round(tps / (tps + fns), 4)
-    f1 = round((2 * tps)/((2*tps) + fps + fns), 4)
+    precision = round(tps / (tps + fps), 5)
+    sn = round(tps / (tps + fns), 5)
+    f1 = round((2 * tps)/((2*tps) + fps + fns), 5)
 
     return fns, fps, tns, tps, sn, precision, f1
 
