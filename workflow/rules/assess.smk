@@ -116,3 +116,29 @@ rule hostile_human_scrubber_classifications:
         CONTAINERS["pysam"]
     script:
         SCRIPTS / "hostile_human_scrubber_classification.py"
+
+
+rule dehumanise_summary_statistics:
+    input:
+        classifications=[
+            RESULTS / f"dehumanise/classifications.{tool}.tsv"
+            for tool in [
+                "sra",
+                "hostile",
+                "minimap2",
+                "miniwinnow",
+                "kraken.k21l14",
+                "kraken.k27l18",
+                "kraken.k35l31",
+            ]
+        ],
+    output:
+        summary=RESULTS / "dehumanise/summary.csv"
+    log:
+        LOGS / "dehumanise_summary_statistics.log"
+    resources:
+        runtime="5m"
+    conda:
+        ENVS / "datasci.yaml"
+    script:
+        SCRIPTS / "dehumanise_summary_statistics.py"
