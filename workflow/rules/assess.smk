@@ -115,4 +115,4 @@ rule hostile_human_scrubber_classifications:
     container:
         CONTAINERS["pysam"]
     script:
-        SCRIPTS / "hostile_human_scrubber_classifications.py"
+        SCRIPTS / "hostile_human_scrubber_classification.py"
