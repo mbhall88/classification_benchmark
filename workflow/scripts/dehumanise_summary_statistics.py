@@ -61,8 +61,8 @@ def main():
                 tool = p.parts[-2]
 
             df = pd.read_csv(p, sep="\t")
-            secs = list(df["s"])[0]
-            rss = list(df["max_rss"])[0]
+            secs = str(round(list(df["s"])[0], 1))
+            rss = str(list(df["max_rss"])[0])
 
             counts = data[tool]
             res = list(map(str, summary(counts)))
