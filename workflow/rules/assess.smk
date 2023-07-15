@@ -139,7 +139,7 @@ rule dehumanise_summary_statistics:
         classifications=[
             RESULTS / f"dehumanise/classifications.{tool}.tsv" for tool in tools
         ],
-        benchmarks=[BENCH / "dehumanise/{tool}/ont.tsv" for tool in tools],
+        benchmarks=benchmarks,
     output:
         summary=RESULTS / "dehumanise/summary.csv",
     log:
