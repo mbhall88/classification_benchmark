@@ -34,12 +34,14 @@ def main():
 
         counts = Counter(df["classification"])
         data[tool] = counts
-
+    # todo get benchmark stats
     with open(snakemake.output.summary, "w") as fd_out:
         print(
             DELIM.join(
                 [
                     "tool",
+                    "Seconds",
+                    "Max. Memory (MB)",
                     "FN",
                     "FP",
                     "TN",
@@ -51,9 +53,20 @@ def main():
             ),
             file=fd_out,
         )
-        for tool, counts in data.items():
+        for p in map(Path, snakemake.input.benchmarks):
+            if "kraken" in str(p):
+                suf = p.parts[-2]
+                tool = f"kraken.{suf}"
+            else:
+                tool = p.parts[-2]
+
+            df = pd.read_csv(p, sep="\t")
+            secs = list(df["s"])[0]
+            rss = list(df["max_rss"])[0]
+
+            counts = data[tool]
             res = list(map(str, summary(counts)))
-            print(DELIM.join([tool, *res]), file=fd_out)
+            print(DELIM.join([tool, secs, rss, *res]), file=fd_out)
 
 
 main()

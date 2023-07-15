@@ -118,20 +118,28 @@ rule hostile_human_scrubber_classifications:
         SCRIPTS / "hostile_human_scrubber_classification.py"
 
 
+tools = [
+    "sra",
+    "hostile",
+    "minimap2",
+    "miniwinnow",
+    "kraken.k21l14",
+    "kraken.k27l18",
+    "kraken.k35l31",
+]
+
+benchmarks = []
+for tool in tools:
+    if tool.startswith("kraken"):
+        tool = tool.replace(".", "/")
+    benchmarks.append(BENCH / f"dehumanise/{tool}/ont.tsv")
+
 rule dehumanise_summary_statistics:
     input:
         classifications=[
-            RESULTS / f"dehumanise/classifications.{tool}.tsv"
-            for tool in [
-                "sra",
-                "hostile",
-                "minimap2",
-                "miniwinnow",
-                "kraken.k21l14",
-                "kraken.k27l18",
-                "kraken.k35l31",
-            ]
+            RESULTS / f"dehumanise/classifications.{tool}.tsv" for tool in tools
         ],
+        benchmarks=[BENCH / "dehumanise/{tool}/ont.tsv" for tool in tools],
     output:
         summary=RESULTS / "dehumanise/summary.csv",
     log:

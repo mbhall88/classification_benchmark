@@ -1,4 +1,4 @@
-REPEAT = 5
+REPEAT = 1
 
 rule sra_human_scrubber:
     input:
