@@ -48,7 +48,7 @@ def main():
                     "TP",
                     "Recall",
                     "Precision",
-                    "F1",
+                    "F-score",
                 ]
             ),
             file=fd_out,
