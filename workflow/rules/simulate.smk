@@ -354,7 +354,6 @@ rule simulate_illumina_reads:
     params:
         opts=f"-na -ss MSv3 -l {ILLUMINA_READ_LENGTH} -s 10 -m {int(ILLUMINA_READ_LENGTH + 100)} -p",
         n_reads=calculate_number_reads,
-        outprefix=lambda wildcards, output: Path(output.r1).parent / wildcards.read_type,
     shadow:
         "shallow"
     shell:
@@ -370,10 +369,11 @@ rule simulate_illumina_reads:
         else
             ref={input.reference}
         fi
+        outprefix=$(mktemp -u)
             
-        art_illumina {params.opts} -i $ref -o {params.outprefix} -c {params.n_reads}
-        gzip -c {params.outprefix}1.fq > {output.r1}
-        gzip -c {params.outprefix}2.fq > {output.r2}
+        art_illumina {params.opts} -i $ref -o $outprefix -c {params.n_reads}
+        gzip -c "${{outprefix}}1.fq" > {output.r1}
+        gzip -c "${{outprefix}}2.fq" > {output.r2}
         """
 
 
