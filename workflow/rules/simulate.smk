@@ -347,7 +347,7 @@ rule simulate_illumina_reads:
         LOGS / "simulate_illumina_reads/{read_type}.log",
     threads: 1
     resources:
-        mem_mb=lambda wildcards, attempt: attempt * simulate_mem[wildcards.read_type],
+        mem_mb=lambda wildcards, attempt: attempt * int(8 * GB),
         runtime="1d",
     conda:
         ENVS / "art.yaml"
