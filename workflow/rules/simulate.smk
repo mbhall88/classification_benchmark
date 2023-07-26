@@ -288,7 +288,7 @@ rule combine_simulated_reads:
             RESULTS / f"simulate/reads/{read_type}.ont.fq.gz"
             for read_type in config["simulate"]["proportions"]
         ],
-        script=SCRIPTS / "filter_ambig.py"
+        script=SCRIPTS / "filter_ambig.py",
     output:
         reads=RESULTS / "simulate/reads/metagenome.ont.fq.gz",
     log:
@@ -299,6 +299,107 @@ rule combine_simulated_reads:
         ENVS / "combine_simulated_reads.yaml"
     params:
         opts="-L 500",
-        max_ambig=0.5
+        max_ambig=0.5,
     shell:
         "(zcat {input.fastqs} | seqtk seq {params.opts} - | python {input.script} - {params.max_ambig} | gzip) > {output.reads} 2> {log}"
+
+
+ILLUMINA_READ_LENGTH = 150
+
+
+def count_contigs(path):
+    if str(path).endswith("gz"):
+        import gzip
+
+        fopen = gzip.open
+    else:
+        fopen = open
+
+    with fopen(path, mode="rt") as fp:
+        return sum(1 for l in fp if l[0] == ">")
+
+
+def calculate_number_reads(wildcards, input):
+    quantity = config["simulate"]["quantity"]
+    n_bases = parse_size(quantity) / 5  # use a fifth of the number of bases in nanopore
+
+    proportions = config["simulate"]["proportions"]
+    prop = proportions.get(wildcards.read_type)
+    if prop is None:
+        raise ValueError(f"No proportion for {wildcards.read_type}")
+    required_bases = n_bases * prop
+    if wildcards.read_type == "Unmapped":
+        n_contigs = 1
+    else:
+        n_contigs = count_contigs(input.reference)
+    total_reads = required_bases / ILLUMINA_READ_LENGTH / 2  # divide by 2 as paired
+    reads_per_contig = max(round(total_reads / n_contigs), 1)
+    return reads_per_contig
+
+
+rule simulate_illumina_reads:
+    input:
+        reference=lambda wildcards: infer_simulate_input(wildcards.read_type),
+    output:
+        r1=RESULTS / "simulate/reads/{read_type}_R1.illumina.fq.gz",
+        r2=RESULTS / "simulate/reads/{read_type}_R2.illumina.fq.gz",
+    log:
+        LOGS / "simulate_illumina_reads/{read_type}.log",
+    threads: 1
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * simulate_mem[wildcards.read_type],
+        runtime="1d",
+    conda:
+        ENVS / "art.yaml"
+    params:
+        opts=f"-na -ss MSv3 -l {ILLUMINA_READ_LENGTH} -s 10 -m {int(ILLUMINA_READ_LENGTH + 100)} -p",
+        n_reads=calculate_number_reads,
+        outprefix=lambda wildcards, output: Path(output.r1).parent / wildcards.read_type,
+    shadow:
+        "shallow"
+    shell:
+        """
+        exec 2> {log}
+        if [ {wildcards.read_type} == "Unmapped" ]; then
+            ref=$(mktemp -u)
+            fastaq make_random_contigs 1 100000000 $ref
+            sed -i "1s/.*/>random/" $ref
+        elif [ file {input.reference} | grep -q compressed ]; then
+            ref=$(mktemp -u)
+            gzip -dc {input.reference} > $ref
+        else
+            ref={input.reference}
+        fi
+            
+        art_illumina {params.opts} -i $ref -o {params.outprefix} -c {params.n_reads}
+        gzip -c {params.outprefix}1.fq > {output.r1}
+        gzip -c {params.outprefix}2.fq > {output.r2}
+        """
+
+
+rule combine_illumina_simulated_reads:
+    input:
+        r1s=sorted(
+            [
+                RESULTS / f"simulate/reads/{read_type}_R1.illumina.fq.gz"
+                for read_type in config["simulate"]["proportions"]
+            ]
+        ),
+        r2s=sorted(
+            [
+                RESULTS / f"simulate/reads/{read_type}_R2.illumina.fq.gz"
+                for read_type in config["simulate"]["proportions"]
+            ]
+        ),
+    output:
+        r1=RESULTS / "simulate/reads/metagenome_R1.illumina.fq.gz",
+        r2=RESULTS / "simulate/reads/metagenome_R2.illumina.fq.gz",
+    log:
+        LOGS / "combine_illumina_simulated_reads.log",
+    resources:
+        runtime="30m",
+    shell:
+        """
+        cat {input.r1s} > {output.r1} 2> {log}
+        cat {input.r2s} > {output.r2} 2>> {log}
+        """

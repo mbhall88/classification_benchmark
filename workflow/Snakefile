@@ -37,6 +37,7 @@ for lib in kraken_libs:
 
 target_files.add(RESULTS / "db/minimap2/db.fa.gz.map-ont.mmi")
 target_files.add(RESULTS / "dehumanise/summary.csv")
+target_files.add(RESULTS / "simulate/reads/metagenome_R1.illumina.fq.gz")
 
 
 localrules:
