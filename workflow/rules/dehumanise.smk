@@ -226,3 +226,29 @@ rule hostile_human_scrubber:
         outdir=lambda wildcards, output: Path(output.reads).parent,
     shell:
         "hostile clean {params.opts} --out-dir {params.outdir} --threads {threads} --fastq1 {input.reads} &> {log}"
+
+
+rule hostile_human_scrubber_illumina:
+    input:
+        r1=rules.sra_human_scrubber_illumina.input.r1,
+        r2=rules.sra_human_scrubber_illumina.input.r2,
+    output:
+        reads1=RESULTS / "dehumanise/hostile/metagenome_R1.illumina.clean_1.fastq.gz",
+        reads2=RESULTS / "dehumanise/hostile/metagenome_R2.illumina.clean_2.fastq.gz",
+    log:
+        LOGS / "hostile_human_scrubber_illumina.log",
+    resources:
+        mem_mb=int(14 * GB),
+        runtime="1h",
+    threads: 4
+    shadow:
+        "shallow"
+    benchmark:
+        repeat(BENCH / "dehumanise/hostile/illumina.tsv", REPEAT)
+    container:
+        CONTAINERS["hostile"]
+    params:
+        opts="--aligner bowtie2 --force",
+        outdir=lambda wildcards, output: Path(output.reads1).parent,
+    shell:
+        "hostile clean {params.opts} --out-dir {params.outdir} --threads {threads} --fastq1 {input.r1} --fastq2 {input.r2} &> {log}"
