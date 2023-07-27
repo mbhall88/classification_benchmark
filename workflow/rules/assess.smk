@@ -188,27 +188,33 @@ tools = [
     "kraken.k35l31",
 ]
 
-benchmarks = []
-for tool in tools:
-    if tool.startswith("kraken"):
-        tool = tool.replace(".", "/")
-    benchmarks.append(BENCH / f"dehumanise/{tool}/ont.tsv")
 
-tech_tool_combos = []
-for tech in ["illumina", "ont"]:
+def infer_benchmarks(wildcards):
+    benchmarks = []
     for tool in tools:
-        if tech == "illumina" and tool == "miniwinnow":
+        if tool.startswith("kraken"):
+            tool = tool.replace(".", "/")
+        if wildcards.tech == "illumina" and tool == "miniwinnow":
             continue
-        tech_tool_combos.append((tech, tool))
+        benchmarks.append(BENCH / f"dehumanise/{tool}/{wildcards.tech}.tsv")
+
+    return benchmarks
+
+
+def infer_classifications(wildcards):
+    clfs = []
+    for tool in tools:
+        if wildcards.tech == "illumina" and tool == "miniwinnow":
+            continue
+        clfs.append(RESULTS / f"dehumanise/classifications.{tool}.{wildcards.tech}.tsv")
+
+    return clfs
 
 
 rule dehumanise_summary_statistics:
     input:
-        classifications=[
-            RESULTS / f"dehumanise/classifications.{tool}.{tech}.tsv"
-            for tech, tool in tech_tool_combos
-        ],
-        benchmarks=benchmarks,
+        classifications=infer_classifications,
+        benchmarks=infer_benchmarks,
     output:
         summary=RESULTS / "dehumanise/summary.{tech}.csv",
     log:
