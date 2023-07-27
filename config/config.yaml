@@ -15,7 +15,6 @@ containers:
   tb_decontam: "docker://quay.io/mbhall88/tb-decontam:0.1.1"
   base: "docker://bash:5.1"
   python: "docker://python:3.10.4-slim-bullseye"
-  spumoni: "docker://quay.io/mbhall88/spumoni:2.0.7"
   minimap2: "docker://quay.io/biocontainers/minimap2:2.26--he4a0461_1"
   pysam: "docker://quay.io/biocontainers/pysam:0.21.0--py310h41dec4a_1"
   samtools: "docker://quay.io/biocontainers/samtools:1.17--hd87286a_1"
