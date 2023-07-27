@@ -23,6 +23,7 @@ def summary(counts: Counter) -> tuple[int, int, int, int, float, float, float]:
 
 def main():
     data = {}
+    is_illumina = "illumina" in snakemake.output.summary
     n_reads = None
     for p in map(Path, snakemake.input.classifications):
         tool = p.name.split(".", maxsplit=1)[1].rsplit(".", maxsplit=1)[0]
@@ -30,11 +31,14 @@ def main():
         if n_reads is None:
             n_reads = len(df)
         else:
-            assert len(df) == n_reads, f"different number of reads in {tool}"
+            if is_illumina and tool.startswith("kraken"):
+                assert len(df) == n_reads / 2, f"different number of reads in {tool}"
+            else:
+                assert len(df) == n_reads, f"different number of reads in {tool}"
 
         counts = Counter(df["classification"])
         data[tool] = counts
-    # todo get benchmark stats
+        
     with open(snakemake.output.summary, "w") as fd_out:
         print(
             DELIM.join(
