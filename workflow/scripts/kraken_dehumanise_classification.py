@@ -22,6 +22,7 @@ COLUMNS = [
 
 def main():
     truth = dict()
+    is_illumina = "illumina" in snakemake.output.classification
     with open(snakemake.input.truth, newline="") as fd:
         reader = csv.DictReader(fd, delimiter="\t")
         for row in reader:
@@ -38,7 +39,13 @@ def main():
                     raise ValueError(f"Seen {read_id} multiple times")
                 else:
                     seen.add(read_id)
-                read_tax = truth.get(read_id)
+
+                if is_illumina:
+                    read_tax = truth.get(f"{read_id}/1")
+                    read_tax2 = truth.get(f"{read_id}/2")
+                    assert read_tax == read_tax2, read_id
+                else:
+                    read_tax = truth.get(read_id)
                 if read_tax is None:
                     raise KeyError(f"{read_id} not in truth")
                 read_is_human = read_tax["species_id"] == HUMAN_SPECIES_ID
