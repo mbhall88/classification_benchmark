@@ -363,7 +363,7 @@ rule simulate_illumina_reads:
             ref=$(mktemp -u)
             fastaq make_random_contigs 1 100000000 $ref
             sed -i "1s/.*/>random/" $ref
-        elif [ file {input.reference} | grep -q compressed ]; then
+        elif file {input.reference} | grep -q compressed; then
             ref=$(mktemp -u)
             gzip -dc {input.reference} > $ref
         else

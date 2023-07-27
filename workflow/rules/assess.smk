@@ -37,6 +37,24 @@ rule make_read_truth:
         SCRIPTS / "make_read_truth.py"
 
 
+rule make_illumina_read_truth:
+    input:
+        acc2tax=rules.accession2taxonomy.output.metadata,
+        nodes=rules.download_kraken_taxonomy.output.nodes,
+        r1=rules.combine_illumina_simulated_reads.output.r1,
+        r2=rules.combine_illumina_simulated_reads.output.r2,
+    output:
+        metadata=RESULTS / "assess/read2taxonomy.illumina.tsv",
+    log:
+        LOGS / "make_illumina_read_truth.log",
+    resources:
+        runtime="2h",
+    conda:
+        ENVS / "make_read_truth.yaml"
+    script:
+        SCRIPTS / "make_illumina_read_truth.py"
+
+
 rule sra_human_scrubber_classifications:
     input:
         reads=rules.sra_human_scrubber.output.reads,
@@ -133,6 +151,7 @@ for tool in tools:
     if tool.startswith("kraken"):
         tool = tool.replace(".", "/")
     benchmarks.append(BENCH / f"dehumanise/{tool}/ont.tsv")
+
 
 rule dehumanise_summary_statistics:
     input:
