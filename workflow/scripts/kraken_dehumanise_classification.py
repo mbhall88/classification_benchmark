@@ -65,6 +65,12 @@ def main():
                 print(f"{read_id}{DELIM}{clf}", file=fd_out)
 
     truth_read_ids = set(truth.keys())
+    if is_illumina:
+        new_seen = set()
+        for readid in seen:
+            for i in [1, 2]:
+                new_seen.add(f"{readid}/{i}")
+        seen = new_seen
     diff = truth_read_ids.symmetric_difference(seen)
     if len(diff) > 0:
         raise ValueError(f"Got read differences between truth and PAF\n{diff}")
