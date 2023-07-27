@@ -75,6 +75,31 @@ def main():
                 clf = classify_scrubbed(entry.name, truth)
                 print(f"{entry.name}{DELIM}{clf}", file=fd_out)
 
+        if "illumina" in snakemake.output.classification:
+            with pysam.FastxFile(snakemake.input.reads2) as fh:
+                for entry in fh:
+                    if entry.name in kept:
+                        raise ValueError(
+                            f"Seen {entry.name} multiple times in kept reads"
+                        )
+                    kept.add(entry.name)
+                    clf = classify_kept(entry.name, truth)
+                    print(f"{entry.name}{DELIM}{clf}", file=fd_out)
+
+            with pysam.FastxFile(snakemake.input.removed2) as fh:
+                for entry in fh:
+                    if entry.name in scrubbed:
+                        raise ValueError(
+                            f"Seen {entry.name} multiple times in scrubbed reads"
+                        )
+                    if entry.name in kept:
+                        raise ValueError(
+                            f"Seen {entry.name} in scrubbed and kept reads"
+                        )
+                    scrubbed.add(entry.name)
+                    clf = classify_scrubbed(entry.name, truth)
+                    print(f"{entry.name}{DELIM}{clf}", file=fd_out)
+
     read_ids = set(truth.keys())
     seen_read_ids = kept.union(scrubbed)
 
