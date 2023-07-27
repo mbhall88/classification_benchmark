@@ -96,6 +96,29 @@ rule minimap2_human_scrubber:
         "minimap2 {params.opts} -t {threads} -o {output.aln} {input.ref} {input.reads} 2> {log}"
 
 
+rule minimap2_human_scrubber_illumina:
+    input:
+        r1=rules.sra_human_scrubber_illumina.input.r1,
+        r2=rules.sra_human_scrubber_illumina.input.r2,
+        ref=rules.download_chm13.output.fasta,
+    output:
+        aln=RESULTS / "dehumanise/minimap2/metagenome.aln.illumina.paf",
+    log:
+        LOGS / "minimap2_human_scrubber_illumina.log",
+    threads: 4
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * int(12 * GB),
+        runtime="30m",
+    benchmark:
+        repeat(BENCH / "dehumanise/minimap2/illumina.tsv", REPEAT)
+    container:
+        CONTAINERS["minimap2"]
+    params:
+        opts="-x sr --paf-no-hit",
+    shell:
+        "minimap2 {params.opts} -t {threads} -o {output.aln} {input.ref} {input.r1} {input.r2} 2> {log}"
+
+
 rule kraken_human_classify:
     input:
         db=rules.build_kraken_human_database.output.db,
