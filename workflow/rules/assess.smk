@@ -85,6 +85,7 @@ rule sra_human_scrubber_classifications_illumina:
         LOGS / "sra_human_scrubber_classifications_illumina.log",
     resources:
         runtime="1h",
+        mem_mb=int(4 * GB),
     container:
         CONTAINERS["pysam"]
     script:
@@ -119,6 +120,7 @@ rule kraken_dehumanise_classification:
         LOGS / "kraken_dehumanise_classification/k{k}l{l}/{tech}.log",
     resources:
         runtime="1h",
+        mem_mb=int(4 * GB),
     container:
         CONTAINERS["python"]
     script:
@@ -151,6 +153,7 @@ rule hostile_human_scrubber_classifications:
         LOGS / "hostile_human_scrubber_classifications.log",
     resources:
         runtime="1h",
+        mem_mb=int(4 * GB),
     container:
         CONTAINERS["pysam"]
     script:
@@ -168,6 +171,7 @@ rule hostile_human_scrubber_classifications_illumina:
         LOGS / "hostile_human_scrubber_classifications_illumina.log",
     resources:
         runtime="1h",
+        mem_mb=int(4 * GB),
     container:
         CONTAINERS["pysam"]
     script:
