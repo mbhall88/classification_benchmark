@@ -26,7 +26,7 @@ def main():
     is_illumina = "illumina" in snakemake.output.summary
     n_reads = None
     for p in map(Path, snakemake.input.classifications):
-        tool = p.name.split(".", maxsplit=1)[1].rsplit(".", maxsplit=1)[0]
+        tool = p.name.split(".", maxsplit=1)[1].rsplit(".", maxsplit=2)[0]
         df = pd.read_csv(p, sep="\t")
         if n_reads is None:
             n_reads = len(df)
@@ -38,7 +38,7 @@ def main():
 
         counts = Counter(df["classification"])
         data[tool] = counts
-        
+
     with open(snakemake.output.summary, "w") as fd_out:
         print(
             DELIM.join(
