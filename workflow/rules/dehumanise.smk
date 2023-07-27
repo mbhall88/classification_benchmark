@@ -145,6 +145,34 @@ rule kraken_human_classify:
         """
 
 
+rule kraken_human_classify_illumina:
+    input:
+        db=rules.build_kraken_human_database.output.db,
+        r1=rules.sra_human_scrubber_illumina.input.r1,
+        r2=rules.sra_human_scrubber_illumina.input.r2,
+    output:
+        report=RESULTS
+        / "dehumanise/kraken/classify/k{k}l{l}/metagenome.illumina.k2report",
+        out=RESULTS / "dehumanise/kraken/classify/k{k}l{l}/metagenome.illumina.k2",
+    log:
+        LOGS / "kraken_human_classify/k{k}l{l}/illumina.log",
+    threads: 4
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * int(6 * GB),
+        runtime=lambda wildcards, attempt: f"{30 * attempt}m",
+    benchmark:
+        repeat(BENCH / "dehumanise/kraken/k{k}l{l}/illumina.tsv", REPEAT)
+    container:
+        CONTAINERS["kraken"]
+    params:
+        opts="--minimum-hit-groups 3 --report-minimizer-data --paired",
+    shell:
+        """
+        kraken2 {params.opts} --threads {threads} --db {input.db} --report {output.report} \
+            --output {output.out} {input.r1} {input.r2} 2> {log}
+        """
+
+
 rule miniwinnow_human_scrubber:
     input:
         reads=rules.sra_human_scrubber.input.reads,
