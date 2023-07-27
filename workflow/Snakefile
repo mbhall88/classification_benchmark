@@ -27,7 +27,6 @@ for size in config["kraken_db_size"]:
         k = d["k"]
         l = d["l"]
         target_files.add(RESULTS / f"kraken/k{k}/l{l}/{size}/db")
-        target_files.add(RESULTS / f"dehumanise/classifications.kraken.k{k}l{l}.tsv")
 
 kraken_libs = ["bacteria", "archaea", "viral", "human", "plasmid"]
 
