@@ -38,7 +38,6 @@ for lib in kraken_libs:
 target_files.add(RESULTS / "db/minimap2/db.fa.gz.map-ont.mmi")
 for tech in ["illumina", "ont"]:
     target_files.add(RESULTS / f"dehumanise/summary.{tech}.csv")
-target_files.add(RESULTS / "assess/read2taxonomy.illumina.tsv")
 
 
 localrules:

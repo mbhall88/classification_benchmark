@@ -145,7 +145,7 @@ rule hostile_human_scrubber_classifications:
         reads=rules.hostile_human_scrubber.output.reads,
         truth=rules.make_read_truth.output.metadata,
     output:
-        classification=RESULTS / "dehumanise/classifications.hostile.tsv",
+        classification=RESULTS / "dehumanise/classifications.hostile.ont.tsv",
     log:
         LOGS / "hostile_human_scrubber_classifications.log",
     resources:
