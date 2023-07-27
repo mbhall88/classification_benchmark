@@ -62,6 +62,17 @@ def main():
                 clf = classify_kept(entry.name, truth)
                 print(f"{entry.name}{DELIM}{clf}", file=fd_out)
 
+        if "illumina" in snakemake.output.classification:
+            with pysam.FastxFile(snakemake.input.reads2) as fh:
+                for entry in fh:
+                    if entry.name in kept:
+                        raise ValueError(
+                            f"Seen {entry.name} multiple times in kept reads"
+                        )
+                    kept.add(entry.name)
+                    clf = classify_kept(entry.name, truth)
+                    print(f"{entry.name}{DELIM}{clf}", file=fd_out)
+
         truth_read_ids = set(truth.keys())
         not_seen_read_ids = truth_read_ids - kept
         for read_id in not_seen_read_ids:

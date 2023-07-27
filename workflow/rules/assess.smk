@@ -109,12 +109,13 @@ rule minimap2_dehumanise_classification:
 
 rule kraken_dehumanise_classification:
     input:
-        truth=rules.make_read_truth.output.metadata,
-        classification=rules.kraken_human_classify.output.out,
+        truth=RESULTS / "assess/read2taxonomy.{tech}.tsv",
+        classification=RESULTS
+        / "dehumanise/kraken/classify/k{k}l{l}/metagenome.{tech}.k2",
     output:
-        classification=RESULTS / "dehumanise/classifications.kraken.k{k}l{l}.tsv",
+        classification=RESULTS / "dehumanise/classifications.kraken.k{k}l{l}.{tech}.tsv",
     log:
-        LOGS / "kraken_dehumanise_classification/k{k}l{l}.log",
+        LOGS / "kraken_dehumanise_classification/k{k}l{l}/{tech}.log",
     resources:
         runtime="20m",
     container:
@@ -128,7 +129,7 @@ rule miniwinnow_dehumanise_classification:
         truth=rules.make_read_truth.output.metadata,
         alignment=rules.miniwinnow_human_scrubber.output.aln,
     output:
-        classification=RESULTS / "dehumanise/classifications.miniwinnow.tsv",
+        classification=RESULTS / "dehumanise/classifications.miniwinnow.ont.tsv",
     log:
         LOGS / "miniwinnow_dehumanise_classification.log",
     resources:
@@ -147,6 +148,23 @@ rule hostile_human_scrubber_classifications:
         classification=RESULTS / "dehumanise/classifications.hostile.tsv",
     log:
         LOGS / "hostile_human_scrubber_classifications.log",
+    resources:
+        runtime="10m",
+    container:
+        CONTAINERS["pysam"]
+    script:
+        SCRIPTS / "hostile_human_scrubber_classification.py"
+
+
+rule hostile_human_scrubber_classifications_illumina:
+    input:
+        reads=rules.hostile_human_scrubber_illumina.output.reads1,
+        reads2=rules.hostile_human_scrubber_illumina.output.reads2,
+        truth=rules.make_illumina_read_truth.output.metadata,
+    output:
+        classification=RESULTS / "dehumanise/classifications.hostile.illumina.tsv",
+    log:
+        LOGS / "hostile_human_scrubber_classifications_illumina.log",
     resources:
         runtime="10m",
     container:
