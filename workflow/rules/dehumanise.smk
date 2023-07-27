@@ -1,5 +1,6 @@
 REPEAT = 1
 
+
 rule sra_human_scrubber:
     input:
         reads=rules.combine_simulated_reads.output.reads,
@@ -29,6 +30,47 @@ rule sra_human_scrubber:
         scrub.sh {params.opts} -p {threads} -o "$tmpout" "$tmpin" >> {log}
         gzip -c "$tmpout" > {output.reads}
         gzip -c "$tmpin".removed_spots > {output.removed}
+        """
+
+
+rule sra_human_scrubber_illumina:
+    input:
+        r1=rules.combine_illumina_simulated_reads.output.r1,
+        r2=rules.combine_illumina_simulated_reads.output.r2,
+    output:
+        reads1=RESULTS / "dehumanise/sra/metagenome_R1.scrubbed.illumina.fq.gz",
+        reads2=RESULTS / "dehumanise/sra/metagenome_R2.scrubbed.illumina.fq.gz",
+        removed1=RESULTS / "dehumanise/sra/metagenome_R1.removed.illumina.fq.gz",
+        removed2=RESULTS / "dehumanise/sra/metagenome_R2.removed.illumina.fq.gz",
+    log:
+        LOGS / "sra_human_scrubber_illumina.log",
+    threads: 4
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * int(16 * GB),
+        runtime="1h",
+    benchmark:
+        repeat(BENCH / "dehumanise/sra/illumina.tsv", REPEAT)
+    container:
+        CONTAINERS["sra_human_scrubber"]
+    params:
+        opts="-x -r",
+    shadow:
+        "shallow"
+    shell:
+        """
+        exec 2> {log}
+        tmpout1=$(mktemp -u --suffix='.fq')
+        tmpout2=$(mktemp -u --suffix='.fq')
+        tmpin1=$(mktemp -u --suffix='.fq')
+        tmpin2=$(mktemp -u --suffix='.fq')
+        gzip -dc {input.r1} > "$tmpin1"
+        gzip -dc {input.r2} > "$tmpin2"
+        scrub.sh {params.opts} -p {threads} -o "$tmpout1" "$tmpin1" >> {log}
+        scrub.sh {params.opts} -p {threads} -o "$tmpout2" "$tmpin2" >> {log}
+        gzip -c "$tmpout1" > {output.reads1}
+        gzip -c "$tmpout2" > {output.reads2}
+        gzip -c "$tmpin1".removed_spots > {output.removed1}
+        gzip -c "$tmpin2".removed_spots > {output.removed2}
         """
 
 
