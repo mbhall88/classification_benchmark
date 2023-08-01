@@ -413,5 +413,5 @@ rule combine_illumina_simulated_reads:
         td=$(mktemp -d)
         seqkit pair --id-regexp '^(\S+)\/[12]' -1 $tmp1 -2 $tmp2 -O $td
         gzip -c $td/$(basename $tmp1) > {output.r1}
-        gzip -c $td/$(basename $tmp2) > {output.r1}
+        gzip -c $td/$(basename $tmp2) > {output.r2}
         """
