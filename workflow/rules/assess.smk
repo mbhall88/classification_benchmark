@@ -65,7 +65,7 @@ rule sra_human_scrubber_classifications:
     log:
         LOGS / "sra_human_scrubber_classifications.log",
     resources:
-        runtime="1h",
+        runtime="15m",
     container:
         CONTAINERS["pysam"]
     script:
@@ -84,7 +84,7 @@ rule sra_human_scrubber_classifications_illumina:
     log:
         LOGS / "sra_human_scrubber_classifications_illumina.log",
     resources:
-        runtime="1h",
+        runtime="15m",
         mem_mb=int(4 * GB),
     container:
         CONTAINERS["pysam"]
@@ -101,7 +101,7 @@ rule minimap2_dehumanise_classification:
     log:
         LOGS / "minimap2_dehumanise_classification/{tech}.log",
     resources:
-        runtime="1h",
+        runtime="15m",
         mem_mb=int(4 * GB),
     conda:
         ENVS / "minimap2_dehumanise_classification.yaml"
@@ -119,7 +119,7 @@ rule kraken_dehumanise_classification:
     log:
         LOGS / "kraken_dehumanise_classification/k{k}l{l}/{tech}.log",
     resources:
-        runtime="1h",
+        runtime="15m",
         mem_mb=int(4 * GB),
     container:
         CONTAINERS["python"]
@@ -152,7 +152,7 @@ rule hostile_human_scrubber_classifications:
     log:
         LOGS / "hostile_human_scrubber_classifications.log",
     resources:
-        runtime="1h",
+        runtime="15m",
         mem_mb=int(4 * GB),
     container:
         CONTAINERS["pysam"]
@@ -170,7 +170,7 @@ rule hostile_human_scrubber_classifications_illumina:
     log:
         LOGS / "hostile_human_scrubber_classifications_illumina.log",
     resources:
-        runtime="1h",
+        runtime="15m",
         mem_mb=int(4 * GB),
     container:
         CONTAINERS["pysam"]
