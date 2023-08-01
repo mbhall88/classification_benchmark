@@ -17,7 +17,7 @@ THREADS=2
 PROFILE="slurm.punim1703"
 BINDS="/data/scratch/projects/punim1703/"
 SINGULARITY_ARGS="-B $BINDS"
-DEFAULT_TMP="tmpdir='tmp/.snakemake'"
+DEFAULT_TMP="tmpdir='/tmp'"
 CMD="snakemake --profile $PROFILE --default-resources \"$DEFAULT_TMP\" --rerun-incomplete --local-cores $THREADS $* --singularity-args '$SINGULARITY_ARGS'"
 
 ssubmit -t "$TIME" -m "$MEMORY" -o "$LOG_DIR"/"$JOB_NAME".o \
