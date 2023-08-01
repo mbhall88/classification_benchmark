@@ -400,11 +400,18 @@ rule combine_illumina_simulated_reads:
     resources:
         runtime="30m",
     conda:
-        ENVS / "combine_simulated_reads.yaml"
+        ENVS / "combine_illumina_simulated_reads.yaml"
     params:
         max_ambig=rules.combine_simulated_reads.params.max_ambig,
     shell:
         """
-        (zcat {input.r1s} | python {input.script} - {params.max_ambig} | gzip) > {output.r1} 2> {log}
-        (zcat {input.r2s} | python {input.script} - {params.max_ambig} | gzip) > {output.r2} 2>> {log}
+        exec 2> {log}
+        tmp1=$(mktemp -u --suffix=_1.fq)
+        tmp2=$(mktemp -u --suffix=_2.fq)
+        (zcat {input.r1s} | python {input.script} - {params.max_ambig}) > $tmp1
+        (zcat {input.r2s} | python {input.script} - {params.max_ambig}) > $tmp2
+        td=$(mktemp -d)
+        seqkit pair --id-regexp '^(\S+)\/[12]' -1 $tmp1 -2 $tmp2 -O $td
+        gzip -c $td/$(basename $tmp1) > {output.r1}
+        gzip -c $td/$(basename $tmp2) > {output.r1}
         """
