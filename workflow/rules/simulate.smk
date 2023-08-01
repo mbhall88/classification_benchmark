@@ -399,6 +399,8 @@ rule combine_illumina_simulated_reads:
         LOGS / "combine_illumina_simulated_reads.log",
     resources:
         runtime="30m",
+    conda:
+        ENVS / "combine_simulated_reads.yaml"
     params:
         max_ambig=rules.combine_simulated_reads.params.max_ambig,
     shell:
