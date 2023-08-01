@@ -391,6 +391,7 @@ rule combine_illumina_simulated_reads:
                 for read_type in config["simulate"]["proportions"]
             ]
         ),
+        script=SCRIPTS / "filter_ambig.py",
     output:
         r1=RESULTS / "simulate/reads/metagenome_R1.illumina.fq.gz",
         r2=RESULTS / "simulate/reads/metagenome_R2.illumina.fq.gz",
@@ -398,8 +399,10 @@ rule combine_illumina_simulated_reads:
         LOGS / "combine_illumina_simulated_reads.log",
     resources:
         runtime="30m",
+    params:
+        max_ambig=rules.combine_simulated_reads.params.max_ambig,
     shell:
         """
-        cat {input.r1s} > {output.r1} 2> {log}
-        cat {input.r2s} > {output.r2} 2>> {log}
+        (zcat {input.r1s} | python {input.script} - {params.max_ambig} | gzip) > {output.r1} 2> {log}
+        (zcat {input.r2s} | python {input.script} - {params.max_ambig} | gzip) > {output.r2} 2>> {log}
         """
