@@ -232,7 +232,7 @@ def infer_simulate_input(read_type):
     elif read_type in ("NTM", "MTBC", "Bacteria"):
         return str(RESULTS / f"simulate/references/{read_type}.fa.gz")
     elif read_type == "Human":
-        return str(RESULTS / f"kraken/db/library/{read_type.lower()}/library.fna")
+        return str(RESULTS / "db/hg02886.fa.gz")
     elif read_type == "Virus":
         return str(RESULTS / f"kraken/db/library/viral/library.fna")
     else:
@@ -299,7 +299,7 @@ rule combine_simulated_reads:
         ENVS / "combine_simulated_reads.yaml"
     params:
         opts="-L 500",
-        max_ambig=0.5,
+        max_ambig=0.25,
     shell:
         "(zcat {input.fastqs} | seqtk seq {params.opts} - | python {input.script} - {params.max_ambig} | gzip) > {output.reads} 2> {log}"
 
@@ -402,7 +402,7 @@ rule combine_illumina_simulated_reads:
     conda:
         ENVS / "combine_illumina_simulated_reads.yaml"
     params:
-        max_ambig=0.01,
+        max_ambig=0.025,
     shell:
         """
         exec 2> {log}

@@ -359,3 +359,19 @@ rule download_chm13:
         url="https://objectstorage.uk-london-1.oraclecloud.com/n/lrbvkel2wjot/b/human-genome-bucket/o/human-t2t-hla.fa.gz",
     shell:
         "wget {params.url} -O {output.fasta} 2> {log}"
+
+rule download_hg02886:
+    output:
+        fasta=RESULTS / "db/hg02886.fa.gz"
+    log:
+        LOGS / "download_hg02886.log"
+    resources:
+        runtime="10m"
+    container:
+        CONTAINERS["base"]
+    params:
+        # from https://www.ncbi.nlm.nih.gov/datasets/genome/GCA_018470455.1/
+        # cite https://www.nature.com/articles/s41586-023-05896-x
+        url="https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/018/470/455/GCA_018470455.1_HG02886.pri.mat.f1_v2/GCA_018470455.1_HG02886.pri.mat.f1_v2_genomic.fna.gz"
+    shell:
+        "wget -nv {params.url} -O {output.fasta} 2> {log}"
