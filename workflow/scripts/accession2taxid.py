@@ -85,6 +85,9 @@ def main():
                 organism = Path(file).parts[-2].capitalize()
                 if organism == "Viral":
                     organism = "Virus"
+            elif organism == "hg02886":
+                organism = "Human"
+
 
             if file.endswith("gz"):
                 openf = gzip.open
