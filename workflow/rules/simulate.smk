@@ -402,7 +402,7 @@ rule combine_illumina_simulated_reads:
     conda:
         ENVS / "combine_illumina_simulated_reads.yaml"
     params:
-        max_ambig=rules.combine_simulated_reads.params.max_ambig,
+        max_ambig=0.01,
     shell:
         """
         exec 2> {log}
