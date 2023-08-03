@@ -360,18 +360,114 @@ rule download_chm13:
     shell:
         "wget {params.url} -O {output.fasta} 2> {log}"
 
+
 rule download_hg02886:
     output:
-        fasta=RESULTS / "db/hg02886.fa.gz"
+        fasta=RESULTS / "db/hg02886.fa.gz",
     log:
-        LOGS / "download_hg02886.log"
+        LOGS / "download_hg02886.log",
     resources:
-        runtime="10m"
+        runtime="10m",
     container:
         CONTAINERS["base"]
     params:
         # from https://www.ncbi.nlm.nih.gov/datasets/genome/GCA_018470455.1/
         # cite https://www.nature.com/articles/s41586-023-05896-x
-        url="https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/018/470/455/GCA_018470455.1_HG02886.pri.mat.f1_v2/GCA_018470455.1_HG02886.pri.mat.f1_v2_genomic.fna.gz"
+        url="https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/018/470/455/GCA_018470455.1_HG02886.pri.mat.f1_v2/GCA_018470455.1_HG02886.pri.mat.f1_v2_genomic.fna.gz",
     shell:
         "wget -nv {params.url} -O {output.fasta} 2> {log}"
+
+
+rule download_GTDB_mycobacterium:
+    output:
+        genomes=directory(RESULTS / "db/GTDB_genus_Mycobacterium/2023-08-03/files"),
+        asm_summary=RESULTS
+        / "db/GTDB_genus_Mycobacterium/2023-08-03/assembly_summary.txt",
+        taxonomy=RESULTS
+        / "db/GTDB_genus_Mycobacterium/2023-08-03/bac120_taxonomy.tsv.gz",
+    log:
+        LOGS / "download_GTDB_mycobacterium.log",
+    resources:
+        runtime="1d",
+        mem_mb=int(4 * GB),
+    threads: 8
+    container:
+        CONTAINERS["genome_updater"]
+    params:
+        opts='-A 0 -m -a -M "gtdb" -f "genomic.fna.gz" -g "bacteria" -d "refseq,genbank"',
+        taxon='-T "g__Mycobacterium"',
+        outdir=lambda wildcards, output: Path(output.genomes).parent.parent,
+        version=lambda wildcards, output: Path(output.genomes).parts[-2],
+    shell:
+        """
+        genome_updater.sh {params.opts} {params.taxon} -o {params.outdir} -b {params.version} -t {threads} &> {log}
+        """
+
+
+rule mycobacterium_full_tree:
+    input:
+        genomes=rules.download_GTDB_mycobacterium.output.genomes,
+    output:
+        tree=RESULTS / "db/GTDB_genus_Mycobacterium/tree.full.dnd",
+        matrix=RESULTS / "db/GTDB_genus_Mycobacterium/distmatrix.full.tsv",
+    log:
+        LOGS / "mycobacterium_full_tree.log",
+    resources:
+        runtime="6h",
+        mem_mb=int(8 * GB),
+    threads: 6
+    container:
+        CONTAINERS["mashtree"]
+    shell:
+        """
+        fofn=$(mktemp -u)
+        find $(realpath {input.genomes}) -type f > $fofn
+        mashtree --file-of-files $fofn --numcpus {threads} --outtree {output.tree} --outmatrix {output.matrix} 2> {log}
+        """
+
+
+rule dereplicate_mycobacterium_assemblies:
+    input:
+        genomes=rules.download_GTDB_mycobacterium.output.genomes,
+        script=SCRIPTS / "dereplicator.py",
+    output:
+        outdir=directory(RESULTS / "db/GTDB_genus_Mycobacterium/dereplicate"),
+    log:
+        LOGS / "dereplicate_mycobacterium_assemblies.log",
+    threads: 16
+    resources:
+        runtime="6h",
+        mem_mb=int(16 * GB),
+    conda:
+        ENVS / "derep.yaml"
+    params:
+        opts="-d 0.01 --verbose",
+    shell:
+        """
+        find {input.genomes} -type f | wc l > {log}
+        python {input.script} {params.opts} --threads {threads} {input.genomes} {output.outdir} 2>> {log}
+        find {output.outdir} -type f | wc l >> {log}
+        """
+
+rule mycobacterium_rep_tree:
+    input:
+        genomes=rules.dereplicate_mycobacterium_assemblies.output.outdir,
+    output:
+        tree=RESULTS / "db/GTDB_genus_Mycobacterium/tree.rep.dnd",
+        matrix=RESULTS / "db/GTDB_genus_Mycobacterium/distmatrix.rep.tsv",
+    log:
+        LOGS / "mycobacterium_rep_tree.log",
+    resources:
+        runtime="1h",
+        mem_mb=int(8 * GB),
+    threads: 6
+    container:
+        CONTAINERS["mashtree"]
+    shell:
+        """
+        fofn=$(mktemp -u)
+        find $(realpath {input.genomes}) -type f > $fofn
+        mashtree --file-of-files $fofn --numcpus {threads} --outtree {output.tree} --outmatrix {output.matrix} 2> {log}
+        """
+
+
