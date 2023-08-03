@@ -437,7 +437,7 @@ rule dereplicate_mycobacterium_assemblies:
     threads: 16
     resources:
         runtime="6h",
-        mem_mb=int(16 * GB),
+        mem_mb=int(32 * GB),
     conda:
         ENVS / "derep.yaml"
     params:
