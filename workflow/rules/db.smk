@@ -388,7 +388,7 @@ rule download_GTDB_mycobacterium:
     log:
         LOGS / "download_GTDB_mycobacterium.log",
     resources:
-        runtime="1d",
+        runtime="2h",
         mem_mb=int(4 * GB),
     threads: 8
     conda:
