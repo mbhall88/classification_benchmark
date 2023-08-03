@@ -3,10 +3,11 @@ import sys
 sys.stderr = open(snakemake.log[0], "w")
 from pathlib import Path
 import pandas as pd
+from math import ceil
 from collections import Counter
 
 DELIM = ","
-
+SIGFIG = 4
 
 def summary(counts: Counter) -> tuple[int, int, int, int, float, float, float]:
     fns = counts["FN"]
@@ -14,9 +15,9 @@ def summary(counts: Counter) -> tuple[int, int, int, int, float, float, float]:
     fps = counts["FP"]
     tns = counts["TN"]
 
-    precision = round(tps / (tps + fps), 5)
-    sn = round(tps / (tps + fns), 5)
-    f1 = round((2 * tps)/((2*tps) + fps + fns), 5)
+    precision = round(tps / (tps + fps), SIGFIG)
+    sn = round(tps / (tps + fns), SIGFIG)
+    f1 = round((2 * tps)/((2*tps) + fps + fns), SIGFIG)
 
     return fns, fps, tns, tps, sn, precision, f1
 
@@ -65,8 +66,8 @@ def main():
                 tool = p.parts[-2]
 
             df = pd.read_csv(p, sep="\t")
-            secs = str(round(list(df["s"])[0], 1))
-            rss = str(list(df["max_rss"])[0])
+            secs = str(ceil(list(df["s"])[0]))
+            rss = str(ceil(list(df["max_rss"])[0]))
 
             counts = data[tool]
             res = list(map(str, summary(counts)))
