@@ -444,9 +444,9 @@ rule dereplicate_mycobacterium_assemblies:
         opts="-d 0.01 --verbose",
     shell:
         """
-        find {input.genomes} -type f | wc l > {log}
+        find {input.genomes} -type f | wc -l > {log}
         python {input.script} {params.opts} --threads {threads} {input.genomes} {output.outdir} 2>> {log}
-        find {output.outdir} -type f | wc l >> {log}
+        find {output.outdir} -type f | wc -l >> {log}
         """
 
 rule mycobacterium_rep_tree:
