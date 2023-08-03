@@ -391,8 +391,8 @@ rule download_GTDB_mycobacterium:
         runtime="1d",
         mem_mb=int(4 * GB),
     threads: 8
-    container:
-        CONTAINERS["genome_updater"]
+    conda:
+        ENVS / "genome_updater.yaml"
     params:
         opts='-A 0 -m -a -M "gtdb" -f "genomic.fna.gz" -g "bacteria" -d "refseq,genbank"',
         taxon='-T "g__Mycobacterium"',
