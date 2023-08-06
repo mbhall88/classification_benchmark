@@ -448,7 +448,7 @@ rule dereplicate_mycobacterium_assemblies:
         fofn=$(mktemp -u)
         find $(realpath {input.genomes}) -type f > $fofn
         wc -l $fofn
-        dRep dereplicate {params.opts} -p {threads} -g $fofn {output.outdir}
+        dRep dereplicate {output.outdir} {params.opts} -p {threads} -g $fofn
         """
 
 
