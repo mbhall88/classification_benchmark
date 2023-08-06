@@ -441,7 +441,7 @@ rule dereplicate_mycobacterium_assemblies:
     container:
         CONTAINERS["drep"]
     params:
-        opts="--contamination 15 --checkM_method taxonomy_wf -S_algorithm fastANI -ms 10000",
+        opts="--contamination 15 --checkM_method taxonomy_wf --S_algorithm fastANI -ms 10000",
     shell:
         """
         exec 2> {log}
