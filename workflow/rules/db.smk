@@ -413,8 +413,8 @@ rule mycobacterium_full_tree:
     log:
         LOGS / "mycobacterium_full_tree.log",
     resources:
-        runtime="6h",
-        mem_mb=int(8 * GB),
+        runtime=lambda wildcards, attempt: f"{6 * attempt}h",
+        mem_mb=lambda wildcards, attempt: attempt * int(16 * GB),
     threads: 6
     container:
         CONTAINERS["mashtree"]
