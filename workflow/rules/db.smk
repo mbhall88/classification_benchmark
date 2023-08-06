@@ -429,25 +429,28 @@ rule mycobacterium_full_tree:
 rule dereplicate_mycobacterium_assemblies:
     input:
         genomes=rules.download_GTDB_mycobacterium.output.genomes,
-        script=SCRIPTS / "dereplicator.py",
+        # script=SCRIPTS / "dereplicator.py",
     output:
         outdir=directory(RESULTS / "db/GTDB_genus_Mycobacterium/dereplicate"),
     log:
         LOGS / "dereplicate_mycobacterium_assemblies.log",
     threads: 16
     resources:
-        runtime="6h",
+        runtime="12h",
         mem_mb=int(32 * GB),
-    conda:
-        ENVS / "derep.yaml"
+    container:
+        CONTAINERS["drep"]
     params:
-        opts="-d 0.01 --verbose",
+        opts="--contamination 15 --checkM_method taxonomy_wf -S_algorithm fastANI -ms 10000",
     shell:
         """
-        find {input.genomes} -type f | wc -l > {log}
-        python {input.script} {params.opts} --threads {threads} {input.genomes} {output.outdir} 2>> {log}
-        find {output.outdir} -type f | wc -l >> {log}
+        exec 2> {log}
+        fofn=$(mktemp -u)
+        find $(realpath {input.genomes}) -type f > $fofn
+        wc -l $fofn
+        dRep dereplicate {params.opts} -p {threads} -g $fofn {output.outdir}
         """
+
 
 rule mycobacterium_rep_tree:
     input:
@@ -469,5 +472,3 @@ rule mycobacterium_rep_tree:
         find $(realpath {input.genomes}) -type f > $fofn
         mashtree --file-of-files $fofn --numcpus {threads} --outtree {output.tree} --outmatrix {output.matrix} 2> {log}
         """
-
-
