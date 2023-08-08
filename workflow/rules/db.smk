@@ -437,7 +437,7 @@ rule build_human_pangenome_kraken_db:
         >&2 echo "Adding to library..."
         kraken2-build --add-to-library {input.fasta} --db {params.db} --no-masking
         >&2 echo "Building..."
-        kraken2-build --db {params.db} --threads {threads} --no-masking
+        kraken2-build --build --db {params.db} --threads {threads} --no-masking
         #>&2 echo "Cleaning..."
         #k2 clean --db {params.db}
         """
@@ -530,7 +530,7 @@ rule build_mycobacterium_kraken_db:
         >&2 echo "Adding to library..."
         kraken2-build --add-to-library {input.fasta} --db {params.db}
         >&2 echo "Building..."
-        kraken2-build --db {params.db} --threads {threads}
+        kraken2-build --build --db {params.db} --threads {threads}
         #>&2 echo "Cleaning..."
         #k2 clean --db {params.db}
         """
