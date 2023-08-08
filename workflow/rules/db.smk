@@ -398,7 +398,7 @@ rule prepare_human_pangenome_for_kraken:
     log:
         LOGS / "prepare_human_pangenome_for_kraken.log",
     resources:
-        runtime="4h",
+        runtime="2h",
     container:
         CONTAINERS["python"]
     params:
@@ -481,7 +481,7 @@ rule prepare_mycobacterium_for_kraken:
     log:
         LOGS / "prepare_mycobacterium_for_kraken.log",
     resources:
-        runtime="4h",
+        runtime="2h",
     container:
         CONTAINERS["python"]
     params:
