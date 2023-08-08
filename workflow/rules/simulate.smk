@@ -36,7 +36,7 @@ rule filter_bacteria_assemblies:
         faidx=rules.index_kraken_bacteria_library.output.idx,
         fasta=rules.index_kraken_bacteria_library.input.fasta,
     output:
-        outdir=directory(RESULTS / "simulate/references/genera"),
+        outdir=temp(directory(RESULTS / "simulate/references/genera")),
     log:
         LOGS / "filter_bacteria_assemblies.log",
     resources:
@@ -86,7 +86,7 @@ rule reduce_bacteria_assemblies:
         indir=rules.filter_bacteria_assemblies.output.outdir,
         script=SCRIPTS / "dereplicator.py",
     output:
-        outdir=directory(RESULTS / "simulate/references/refined_genera"),
+        outdir=temp(directory(RESULTS / "simulate/references/refined_genera")),
     log:
         LOGS / "reduce_bacteria_assemblies.log",
     threads: 16

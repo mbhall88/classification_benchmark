@@ -486,7 +486,16 @@ rule prepare_mycobacterium_for_kraken:
         CONTAINERS["python"]
     params:
         opts="-r",
-        exclude="GCF_932530395.1",
+        exclude=",".join([
+            "GCF_932530395.1",  # MTB
+            "GCF_017190695.1",  # M. abscessus
+            "GCF_020735285.1",  # M. avium
+            "GCA_014701265.1",  # M. kansasii
+            "GCF_000013925.1",  # M. ulcerans
+            "GCF_016756075.1",  # M. intracellulare
+            "GCF_010727125.1",  # M. terrae
+            "GCF_001307545.1",  # M. fortuitum
+        ]),
     shell:
         "python {input.script} -x {params.exclude} {params.opts} -o {output.fasta} -s {input.summary} {input.genomes} 2> {log}"
 
