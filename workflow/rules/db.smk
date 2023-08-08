@@ -328,23 +328,6 @@ rule index_db_with_minimap2:
         "minimap2 {params.opts} -t {threads} -d {output.index} {input.fasta} 2> {log}"
 
 
-rule prepare_spumoni_index:
-    input:
-        fasta=rules.faidx_db.output.fasta,
-        metadata=rules.combine_references.output.metadata,
-    output:
-        file_list=RESULTS / "spumoni/db/file_list.txt",
-        fasta_dir=temp(directory(RESULTS / "spumoni/db/individual_fastas")),
-    log:
-        LOGS / "prepare_spumoni_index.log",
-    resources:
-        runtime="15m",
-    container:
-        CONTAINERS["python"]
-    script:
-        SCRIPTS / "prepare_spumoni_index.py"
-
-
 rule download_chm13:
     output:
         fasta=RESULTS / "db/chm13.fa.gz",
@@ -361,6 +344,7 @@ rule download_chm13:
         "wget {params.url} -O {output.fasta} 2> {log}"
 
 
+# todo: change to https://www.nature.com/articles/nature20098
 rule download_hg02886:
     output:
         fasta=RESULTS / "db/hg02886.fa.gz",
@@ -378,9 +362,92 @@ rule download_hg02886:
         "wget -nv {params.url} -O {output.fasta} 2> {log}"
 
 
+rule download_human_pangenome_assemblies:
+    output:
+        genomes=temp(directory(RESULTS / "db/HPRC/genomes")),
+    log:
+        LOGS / "download_human_pangenome_assemblies.log",
+    resources:
+        runtime="2h",
+    conda:
+        ENVS / "download_human_pangenome_assemblies.yaml"
+    shadow:
+        "shallow"
+    params:
+        api_key="fd7d16dad79445ea7fdb15e56067de037f08",
+        accession="PRJNA730822",
+        opts="--include genome",
+    shell:
+        """
+        exec 2> {log}
+        tmpd=$(mktemp --directory)
+        tmpf=$(mktemp -u -p $tmpd --suffix ".zip")
+        datasets download genome accession {params.accession} --api-key {params.api_key} \
+            --filename $tmpf {params.opts}
+        unzip $tmpf -d $tmpd
+        mv $tmpd/ncbi_dataset/data {output.genomes}
+        """
+
+
+rule prepare_human_pangenome_for_kraken:
+    input:
+        genomes=rules.download_human_pangenome_assemblies.output.genomes,
+        script=SCRIPTS / "prepare_kraken_fasta.py",
+    output:
+        fasta=temp(RESULTS / "db/HPRC/genomes.fna"),
+    log:
+        LOGS / "prepare_human_pangenome_for_kraken.log",
+    resources:
+        runtime="4h",
+    container:
+        CONTAINERS["python"]
+    params:
+        opts="-r -T 9606",
+    shell:
+        "python {input.script} {params.opts} -o {output.fasta} {input.genomes} 2> {log}"
+
+
+rule build_human_pangenome_kraken_db:
+    input:
+        fasta=rules.prepare_human_pangenome_for_kraken.output.fasta,
+    output:
+        hash=RESULTS / "db/HPRC/kraken/db/hash.k2d",
+        opts=RESULTS / "db/HPRC/kraken/db/opts.k2d",
+        taxo=RESULTS / "db/HPRC/kraken/db/taxo.k2d",
+    log:
+        LOGS / "build_human_pangenome_kraken_db.log",
+    resources:
+        runtime="2d",
+        mem_mb=int(64 * GB),
+    threads: 16
+    container:
+        CONTAINERS["kraken"]
+    params:
+        db=lambda wildcards, output: Path(output.opts).parent,
+    shell:
+        """
+        exec 2> {log}
+        # remove annoying perl warnings
+        export LANGUAGE=en_US.UTF-8
+        export LC_ALL=en_US.UTF-8
+        export LANG=en_US.UTF-8
+        export LC_CTYPE=en_US.UTF-8
+        >&2 echo "Downloading taxonomy..."
+        k2 download-taxonomy --db {params.db}
+        >&2 echo "Adding to library..."
+        k2 add-to-library --file {input.fasta} --db {params.db} --no-masking
+        >&2 echo "Building..."
+        k2 build --db {params.db} --threads {threads} --no-masking
+        >&2 echo "Cleaning..."
+        k2 clean --db {params.db}
+        """
+
+
 rule download_GTDB_mycobacterium:
     output:
-        genomes=directory(RESULTS / "db/GTDB_genus_Mycobacterium/2023-08-03/files"),
+        genomes=temp(
+            directory(RESULTS / "db/GTDB_genus_Mycobacterium/2023-08-03/files")
+        ),
         asm_summary=RESULTS
         / "db/GTDB_genus_Mycobacterium/2023-08-03/assembly_summary.txt",
         taxonomy=RESULTS
@@ -404,6 +471,62 @@ rule download_GTDB_mycobacterium:
         """
 
 
+rule prepare_mycobacterium_for_kraken:
+    input:
+        genomes=rules.download_GTDB_mycobacterium.output.genomes,
+        script=SCRIPTS / "prepare_kraken_fasta.py",
+        summary=rules.download_GTDB_mycobacterium.output.asm_summary,
+    output:
+        fasta=temp(RESULTS / "db/GTDB_genus_Mycobacterium/genomes.fna"),
+    log:
+        LOGS / "prepare_mycobacterium_for_kraken.log",
+    resources:
+        runtime="4h",
+    container:
+        CONTAINERS["python"]
+    params:
+        opts="-r",
+        exclude="GCF_932530395.1",
+    shell:
+        "python {input.script} -x {params.exclude} {params.opts} -o {output.fasta} -s {input.summary} {input.genomes} 2> {log}"
+
+
+rule build_mycobacterium_kraken_db:
+    input:
+        fasta=rules.prepare_human_pangenome_for_kraken.output.fasta,
+    output:
+        hash=RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/hash.k2d",
+        opts=RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/opts.k2d",
+        taxo=RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/taxo.k2d",
+    log:
+        LOGS / "build_mycobacterium_kraken_db.log",
+    resources:
+        runtime="1d",
+        mem_mb=int(16 * GB),
+    threads: 8
+    container:
+        CONTAINERS["kraken"]
+    params:
+        db=lambda wildcards, output: Path(output.opts).parent,
+    shell:
+        """
+        exec 2> {log}
+        # remove annoying perl warnings
+        export LANGUAGE=en_US.UTF-8
+        export LC_ALL=en_US.UTF-8
+        export LANG=en_US.UTF-8
+        export LC_CTYPE=en_US.UTF-8
+        >&2 echo "Downloading taxonomy..."
+        k2 download-taxonomy --db {params.db}
+        >&2 echo "Adding to library..."
+        k2 add-to-library --file {input.fasta} --db {params.db} --no-masking
+        >&2 echo "Building..."
+        k2 build --db {params.db} --threads {threads} --no-masking
+        >&2 echo "Cleaning..."
+        k2 clean --db {params.db}
+        """
+
+
 rule mycobacterium_full_tree:
     input:
         genomes=rules.download_GTDB_mycobacterium.output.genomes,
@@ -415,52 +538,6 @@ rule mycobacterium_full_tree:
     resources:
         runtime=lambda wildcards, attempt: f"{6 * attempt}h",
         mem_mb=lambda wildcards, attempt: attempt * int(16 * GB),
-    threads: 6
-    container:
-        CONTAINERS["mashtree"]
-    shell:
-        """
-        fofn=$(mktemp -u)
-        find $(realpath {input.genomes}) -type f > $fofn
-        mashtree --file-of-files $fofn --numcpus {threads} --outtree {output.tree} --outmatrix {output.matrix} 2> {log}
-        """
-
-
-rule dereplicate_mycobacterium_assemblies:
-    input:
-        genomes=rules.download_GTDB_mycobacterium.output.genomes,
-        script=SCRIPTS / "dereplicator.py",
-    output:
-        outdir=directory(RESULTS / "db/GTDB_genus_Mycobacterium/dereplicate"),
-    log:
-        LOGS / "dereplicate_mycobacterium_assemblies.log",
-    threads: 16
-    resources:
-        runtime="6h",
-        mem_mb=int(32 * GB),
-    conda:
-        ENVS / "derep.yaml"
-    params:
-        opts="-d 0.01 --verbose",
-    shell:
-        """
-        find {input.genomes} -type f | wc -l > {log}
-        python {input.script} {params.opts} --threads {threads} {input.genomes} {output.outdir} 2>> {log}
-        find {output.outdir} -type f | wc -l >> {log}
-        """
-
-
-rule mycobacterium_rep_tree:
-    input:
-        genomes=rules.dereplicate_mycobacterium_assemblies.output.outdir,
-    output:
-        tree=RESULTS / "db/GTDB_genus_Mycobacterium/tree.rep.dnd",
-        matrix=RESULTS / "db/GTDB_genus_Mycobacterium/distmatrix.rep.tsv",
-    log:
-        LOGS / "mycobacterium_rep_tree.log",
-    resources:
-        runtime="1h",
-        mem_mb=int(8 * GB),
     threads: 6
     container:
         CONTAINERS["mashtree"]

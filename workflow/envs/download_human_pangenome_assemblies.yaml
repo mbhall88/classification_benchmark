@@ -1,0 +1,4 @@
+channels:
+  - conda-forge
+dependencies:
+  - ncbi-datasets-cli=15.6.1

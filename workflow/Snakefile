@@ -38,8 +38,9 @@ target_files.add(RESULTS / "db/minimap2/db.fa.gz.map-ont.mmi")
 for tech in ["illumina", "ont"]:
     target_files.add(RESULTS / f"dehumanise/summary.{tech}.csv")
 
-target_files.add(RESULTS / "db/GTDB_genus_Mycobacterium/tree.rep.dnd")
-target_files.add(RESULTS / "db/GTDB_genus_Mycobacterium/tree.full.dnd")
+target_files.add(RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/hash.k2d")
+target_files.add(RESULTS / "db/HPRC/kraken/db/hash.k2d")
+
 
 localrules:
     all,
