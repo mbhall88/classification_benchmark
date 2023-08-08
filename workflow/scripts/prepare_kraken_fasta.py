@@ -39,11 +39,13 @@ def main():
         acc2file[acc] = p.resolve()
 
     acc2tax = dict()
-    asm_summary = Path(sys.argv[2])
+    asm_summary = Path(args.asm_summary)
     if not asm_summary.exists():
-        all_tax = sys.argv[2]
+        if not args.taxon:
+            raise ValueError("Need either --asm-summary or --taxon")
+        all_tax = args.taxon
     else:
-        with open(sys.argv[2]) as fp:
+        with open(asm_summary) as fp:
             for line in fp:
                 fields = line.split("\t")
                 acc = fields[0]
