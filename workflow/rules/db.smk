@@ -363,30 +363,30 @@ rule download_hg02886:
 
 
 rule download_human_pangenome_assemblies:
+    input:
+        summary=CONFIG / "hprc_assembly_summary.txt"
     output:
-        genomes=temp(directory(RESULTS / "db/HPRC/genomes")),
+        genomes=temp(
+            directory(RESULTS / "db/HPRC/2023-08-08/files")
+        ),
     log:
         LOGS / "download_human_pangenome_assemblies.log",
     resources:
         runtime="2h",
+        mem_mb=int(4 * GB),
+    threads: 8
     conda:
-        ENVS / "download_human_pangenome_assemblies.yaml"
-    shadow:
-        "shallow"
+        ENVS / "genome_updater.yaml"
     params:
-        api_key="fd7d16dad79445ea7fdb15e56067de037f08",
-        accession="PRJNA730822",
-        opts="--include genome",
+        opts='-m -a -f "genomic.fna.gz"',
+        outdir=lambda wildcards, output: Path(output.genomes).parent.parent,
+        version=lambda wildcards, output: Path(output.genomes).parts[-2],
     shell:
         """
-        exec 2> {log}
-        tmpd=$(mktemp --directory)
-        tmpf=$(mktemp -u -p $tmpd --suffix ".zip")
-        datasets download genome accession {params.accession} --api-key {params.api_key} \
-            --filename $tmpf {params.opts}
-        unzip $tmpf -d $tmpd
-        mv $tmpd/ncbi_dataset/data {output.genomes}
+        genome_updater.sh {params.opts} -o {params.outdir} -b {params.version} \
+            -t {threads} -e "{input.summary}" &> {log}
         """
+
 
 
 rule prepare_human_pangenome_for_kraken:
