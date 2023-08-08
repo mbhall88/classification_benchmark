@@ -83,8 +83,8 @@ def main():
 
         for line in map(str.rstrip, fp):
             if line[0] == ">":
-                contig = line.split()[0][1:]
-                contig = f"{contig}|kraken:taxid|{taxid}"
+                contig = line.split()[0][1:].split("_")[-1]
+                contig = f"kraken:taxid|{taxid}|{contig}"
                 comment = " ".join(line.split()[1:])
                 header = f">{contig} {comment}"
                 print(header, file=out_fp)

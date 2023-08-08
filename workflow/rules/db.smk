@@ -433,13 +433,13 @@ rule build_human_pangenome_kraken_db:
         export LANG=en_US.UTF-8
         export LC_CTYPE=en_US.UTF-8
         >&2 echo "Downloading taxonomy..."
-        k2 download-taxonomy --db {params.db}
+        kraken2-build --download-taxonomy --db {params.db}
         >&2 echo "Adding to library..."
-        k2 add-to-library --file {input.fasta} --db {params.db} --no-masking
+        kraken2-build --add-to-library {input.fasta} --db {params.db} --no-masking
         >&2 echo "Building..."
-        k2 build --db {params.db} --threads {threads} --no-masking
-        >&2 echo "Cleaning..."
-        k2 clean --db {params.db}
+        kraken2-build --db {params.db} --threads {threads} --no-masking
+        #>&2 echo "Cleaning..."
+        #k2 clean --db {params.db}
         """
 
 
@@ -526,13 +526,13 @@ rule build_mycobacterium_kraken_db:
         export LANG=en_US.UTF-8
         export LC_CTYPE=en_US.UTF-8
         >&2 echo "Downloading taxonomy..."
-        k2 download-taxonomy --db {params.db}
+        kraken2-build --download-taxonomy --db {params.db}
         >&2 echo "Adding to library..."
-        k2 add-to-library --file {input.fasta} --db {params.db} --no-masking
+        kraken2-build --add-to-library {input.fasta} --db {params.db}
         >&2 echo "Building..."
-        k2 build --db {params.db} --threads {threads} --no-masking
-        >&2 echo "Cleaning..."
-        k2 clean --db {params.db}
+        kraken2-build --db {params.db} --threads {threads}
+        #>&2 echo "Cleaning..."
+        #k2 clean --db {params.db}
         """
 
 
