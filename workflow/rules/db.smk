@@ -502,7 +502,7 @@ rule prepare_mycobacterium_for_kraken:
 
 rule build_mycobacterium_kraken_db:
     input:
-        fasta=rules.prepare_human_pangenome_for_kraken.output.fasta,
+        fasta=rules.prepare_mycobacterium_for_kraken.output.fasta,
     output:
         hash=RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/hash.k2d",
         opts=RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/opts.k2d",
