@@ -410,9 +410,7 @@ rule build_human_pangenome_kraken_db:
     input:
         fasta=rules.prepare_human_pangenome_for_kraken.output.fasta,
     output:
-        hash=RESULTS / "db/HPRC/kraken/db/hash.k2d",
-        opts=RESULTS / "db/HPRC/kraken/db/opts.k2d",
-        taxo=RESULTS / "db/HPRC/kraken/db/taxo.k2d",
+        db=directory(RESULTS / "db/HPRC/kraken/db")
     log:
         LOGS / "build_human_pangenome_kraken_db.log",
     resources:
@@ -421,8 +419,6 @@ rule build_human_pangenome_kraken_db:
     threads: 16
     container:
         CONTAINERS["kraken"]
-    params:
-        db=lambda wildcards, output: Path(output.opts).parent,
     shell:
         """
         exec 2> {log}
@@ -432,13 +428,13 @@ rule build_human_pangenome_kraken_db:
         export LANG=en_US.UTF-8
         export LC_CTYPE=en_US.UTF-8
         >&2 echo "Downloading taxonomy..."
-        kraken2-build --download-taxonomy --db {params.db}
+        kraken2-build --download-taxonomy --db {output.db}
         >&2 echo "Adding to library..."
-        kraken2-build --add-to-library {input.fasta} --db {params.db} --no-masking
+        kraken2-build --add-to-library {input.fasta} --db {output.db} --no-masking
         >&2 echo "Building..."
-        kraken2-build --build --db {params.db} --threads {threads}
+        kraken2-build --build --db {output.db} --threads {threads}
         #>&2 echo "Cleaning..."
-        #k2 clean --db {params.db}
+        #k2 clean --db {output.db}
         """
 
 
