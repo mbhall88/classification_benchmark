@@ -40,6 +40,23 @@ rule filter_bacteria_assemblies:
     script:
         SCRIPTS / "filter_bacteria_assemblies.py"
 
+# todo: cite https://doi.org/10.1093/gigascience/giac022
+rule download_koref:
+    output:
+        fasta=RESULTS / "simulate/references/Human.fa.gz",
+    log:
+        LOGS / "download_koref.log",
+    resources:
+        runtime="30m",
+    conda:
+        ENVS / "download.yaml"
+    params:
+        url="https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/020/497/085/GCA_020497085.1_KOREF_S1v2.1/GCA_020497085.1_KOREF_S1v2.1_genomic.fna.gz",
+        min_length=100_000
+    shell:
+        "(wget -nv {params.url} -O - | seqtk seq -L 100000 - | gzip) > {output.fasta} 2> {log}"
+
+
 
 rule download_held_out_mycobacterium:
     output:
