@@ -352,8 +352,8 @@ rule download_koref:
         LOGS / "download_koref.log",
     resources:
         runtime="10m",
-    container:
-        CONTAINERS["seqtk"]
+    conda:
+        ENVS / "download.yaml"
     params:
         url="https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/020/497/085/GCA_020497085.1_KOREF_S1v2.1/GCA_020497085.1_KOREF_S1v2.1_genomic.fna.gz",
         min_length=100_000

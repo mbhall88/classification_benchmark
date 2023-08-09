@@ -21,7 +21,7 @@ def eprint(msg):
 def main():
     eprint("Loading summary...")
 
-    asm_dir = Path(snakemake.input.genomes) / "files"
+    asm_dir = Path(snakemake.input.genomes)
     summary_file = asm_dir / "assembly_summary.txt"
 
     if not summary_file.exists():
