@@ -17,7 +17,7 @@ Entrez.email = "michael.hall2@unimelb.edu.au"
 DELIM = "\t"
 MTB_TAXID = "1773"
 HUMAN_TAXID = "9606"
-TAXID_REGEX = re.compile(r"taxid=(?P<id>\d+)")
+TAXID_REGEX = re.compile(r"taxid[=|](?P<id>\d+)")
 
 
 @cache
@@ -85,9 +85,6 @@ def main():
                 organism = Path(file).parts[-2].capitalize()
                 if organism == "Viral":
                     organism = "Virus"
-            elif organism == "hg02886":
-                organism = "Human"
-
 
             if file.endswith("gz"):
                 openf = gzip.open
@@ -103,7 +100,7 @@ def main():
                     elif organism == "Human":
                         taxid = HUMAN_TAXID
                     else:
-                        taxid = seqid.split("|")[1]
+                        raise ValueError(f"Could identify taxid for {header} in {file}")
 
                     row = [seqid, "", "", "", "", "", ""]
 

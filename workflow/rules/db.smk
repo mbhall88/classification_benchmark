@@ -347,7 +347,7 @@ rule download_chm13:
 # todo: cite https://doi.org/10.1093/gigascience/giac022
 rule download_koref:
     output:
-        fasta=RESULTS / "db/KOREF_S1v2.1.fa.gz",
+        fasta=RESULTS / "simulate/references/Human.fa.gz",
     log:
         LOGS / "download_koref.log",
     resources:

@@ -163,10 +163,8 @@ def infer_simulate_input(read_type):
     if read_type == "Unmapped":
         # just pick smallest fasta as we wont actually take sequences from it
         return str(RESULTS / "simulate/references/MTBC.fa.gz")
-    elif read_type in ("NTM", "MTBC", "Bacteria"):
+    elif read_type in ("NTM", "MTBC", "Bacteria", "Human"):
         return str(RESULTS / f"simulate/references/{read_type}.fa.gz")
-    elif read_type == "Human":
-        return str(RESULTS / "db/KOREF_S1v2.1.fa.gz")
     elif read_type == "Virus":
         return str(RESULTS / f"kraken/db/library/viral/library.fna")
     else:
