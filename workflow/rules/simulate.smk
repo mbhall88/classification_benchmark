@@ -208,7 +208,7 @@ rule simulate_nanopore_reads:
     threads: 8
     resources:
         mem_mb=lambda wildcards, attempt: attempt * simulate_mem[wildcards.read_type],
-        runtime="2d",
+        runtime="4h",
     container:
         CONTAINERS["badread"]
     params:
