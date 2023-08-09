@@ -1,21 +1,3 @@
-rule separate_db_by_organism:
-    input:
-        metadata=rules.combine_references.output.metadata,
-        fasta=rules.faidx_db.output.fasta,
-        faidx=rules.faidx_db.output.faidx,
-    output:
-        refs=[RESULTS / f"simulate/references/{org}.fa.gz" for org in ["TB"]],
-    log:
-        LOGS / "separate_db_by_organism.log",
-    resources:
-        runtime="1h",
-        mem_mb=int(4 * GB),
-    container:
-        CONTAINERS["pysam"]
-    script:
-        SCRIPTS / "separate_db_by_organism.py"
-
-
 rule index_kraken_bacteria_library:
     input:
         fasta=rules.download_kraken_bacteria_db.output.fasta,
@@ -59,26 +41,44 @@ rule filter_bacteria_assemblies:
         SCRIPTS / "filter_bacteria_assemblies.py"
 
 
-rule filter_mycobacterial_assemblies:
-    input:
-        faidx=rules.index_kraken_bacteria_library.output.idx,
-        fasta=rules.index_kraken_bacteria_library.input.fasta,
+rule download_held_out_mycobacterium:
     output:
-        outdir=directory(RESULTS / "simulate/references/mycobacteria"),
+        genomes=temp(directory(RESULTS / "simulate/reference/mycobacteria/2023-08-09/")),
     log:
-        LOGS / "filter_mycobacterial_assemblies.log",
+        LOGS / "download_held_out_mycobacterium.log",
     resources:
-        runtime="1h",
-        mem_mb=int(4 * GB),
-    container:
-        CONTAINERS["pysam"]
+        runtime="20m",
+        mem_mb=int(2 * GB),
+    threads: 2
+    conda:
+        ENVS / "genome_updater.yaml"
     params:
-        min_length=50_000,
-        min_asm=1,
-        max_asm=1_000,
-        include=rules.filter_bacteria_assemblies.params.exclude,
+        opts='-m -a -f "genomic.fna.gz" -g "bacteria" -d "refseq,genbank"',
+        filter=rules.prepare_mycobacterium_for_kraken.params.exclude,
+        outdir=lambda wildcards, output: Path(output.genomes).parent,
+        version=lambda wildcards, output: Path(output.genomes).parts[-1],
+    shell:
+        """
+        genome_updater.sh {params.opts} -o {params.outdir} -b {params.version} \
+            -t {threads} -F "1:{params.filter}" &> {log}
+        """
+
+
+rule split_mycobacteria:
+    input:
+        genomes=rules.download_held_out_mycobacterium.output.genomes,
+    output:
+        ntm_fasta=RESULTS / "simulate/references/NTM.fa.gz",
+        mtbc_fasta=RESULTS / "simulate/references/MTBC.fa.gz",
+    log:
+        LOGS / "split_mycobacteria.log",
+    resources:
+        runtime="5m",
+        mem_mb=int(2 * GB),
+    conda:
+        ENVS / "split_mycobacteria.yaml"
     script:
-        SCRIPTS / "filter_mycobacterial_assemblies.py"
+        SCRIPTS / "split_mycobacteria.py"
 
 
 rule reduce_bacteria_assemblies:
@@ -111,36 +111,6 @@ rule reduce_bacteria_assemblies:
         """
 
 
-rule reduce_mycobacterial_assemblies:
-    input:
-        indir=rules.filter_mycobacterial_assemblies.output.outdir,
-        script=SCRIPTS / "dereplicator.py",
-    output:
-        outdir=directory(RESULTS / "simulate/references/refined_mycobacteria"),
-    log:
-        LOGS / "reduce_mycobacterial_assemblies.log",
-    threads: 8
-    resources:
-        runtime="2h",
-        mem_mb=int(8 * GB),
-    conda:
-        ENVS / "derep.yaml"
-    params:
-        opts="-d 0.001",
-    shell:
-        """
-        exec &> {log}
-        for dir in {input.indir}/*/
-        do
-            dir=${{dir%/}}
-            genus=${{dir##*/}}
-            echo "Dereplicating $genus"
-            outdir={output.outdir}/$genus
-            python {input.script} {params.opts} --threads {threads} $dir $outdir
-        done
-        """
-
-
 rule combine_bacteria_assemblies:
     input:
         asmdir=rules.reduce_bacteria_assemblies.output.outdir,
@@ -155,42 +125,6 @@ rule combine_bacteria_assemblies:
         CONTAINERS["rs_utils"]
     shell:
         "fd -e fa -X gzip -c \; . {input.asmdir} 2> {log} > {output.fasta}"
-
-
-rule combine_mycobacterial_assemblies:
-    input:
-        asmdir=rules.reduce_mycobacterial_assemblies.output.outdir,
-    output:
-        fasta=RESULTS / "simulate/references/Mycobacteria.fa.gz",
-    log:
-        LOGS / "combine_mycobacterial_assemblies.log",
-    resources:
-        mem_mb=GB,
-        runtime="30m",
-    container:
-        CONTAINERS["rs_utils"]
-    shell:
-        "fd -e fa -X gzip -c \; . {input.asmdir} 2> {log} > {output.fasta}"
-
-
-rule split_mycobacteria:
-    input:
-        fasta=rules.combine_mycobacterial_assemblies.output.fasta,
-        nodes=rules.download_kraken_taxonomy.output.nodes,
-        tb_asm=RESULTS / f"simulate/references/TB.fa.gz",
-        lineage_info=CONFIG / "mtb_gramtools_lineages.csv",
-    output:
-        ntm_fasta=RESULTS / "simulate/references/NTM.fa.gz",
-        mtbc_fasta=RESULTS / "simulate/references/MTBC.fa.gz",
-    log:
-        LOGS / "split_mycobacteria.log",
-    resources:
-        runtime="1h",
-        mem_mb=int(2 * GB),
-    conda:
-        ENVS / "split_mycobacteria.yaml"
-    script:
-        SCRIPTS / "split_mycobacteria.py"
 
 
 def simulate_options(wildcards):
@@ -232,7 +166,7 @@ def infer_simulate_input(read_type):
     elif read_type in ("NTM", "MTBC", "Bacteria"):
         return str(RESULTS / f"simulate/references/{read_type}.fa.gz")
     elif read_type == "Human":
-        return str(RESULTS / "db/hg02886.fa.gz")
+        return str(RESULTS / "db/KOREF_S1v2.1.fa.gz")
     elif read_type == "Virus":
         return str(RESULTS / f"kraken/db/library/viral/library.fna")
     else:
@@ -244,7 +178,7 @@ simulate_mem = {
     "Human": 128 * GB,
     "Virus": 16 * GB,
     "MTBC": 8 * GB,
-    "NTM": 32 * GB,
+    "NTM": 16 * GB,
     "Unmapped": 8 * GB,
 }
 
@@ -328,13 +262,8 @@ def calculate_number_reads(wildcards, input):
     if prop is None:
         raise ValueError(f"No proportion for {wildcards.read_type}")
     required_bases = n_bases * prop
-    if wildcards.read_type == "Unmapped":
-        n_contigs = 1
-    else:
-        n_contigs = count_contigs(input.reference)
     total_reads = required_bases / ILLUMINA_READ_LENGTH / 2  # divide by 2 as paired
-    reads_per_contig = max(round(total_reads / n_contigs), 1)
-    return reads_per_contig
+    return total_reads
 
 
 rule simulate_illumina_reads:
@@ -348,7 +277,7 @@ rule simulate_illumina_reads:
     threads: 1
     resources:
         mem_mb=lambda wildcards, attempt: attempt * int(8 * GB),
-        runtime="1d",
+        runtime="1h",
     conda:
         ENVS / "art.yaml"
     params:
@@ -369,9 +298,11 @@ rule simulate_illumina_reads:
         else
             ref={input.reference}
         fi
+        n_contigs=$(grep -c '^>' $ref)
+        n_reads=$(python -c "print(max(round(int({params.n_reads}) / int($n_contigs)), 1))")
         outprefix=$(mktemp -u)
             
-        art_illumina {params.opts} -i $ref -o $outprefix -c {params.n_reads}
+        art_illumina {params.opts} -i $ref -o $outprefix -c $n_reads
         gzip -c "${{outprefix}}1.fq" > {output.r1}
         gzip -c "${{outprefix}}2.fq" > {output.r2}
         """

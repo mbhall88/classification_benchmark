@@ -344,22 +344,21 @@ rule download_chm13:
         "wget {params.url} -O {output.fasta} 2> {log}"
 
 
-# todo: change to https://www.nature.com/articles/nature20098
-rule download_hg02886:
+# todo: cite https://doi.org/10.1093/gigascience/giac022
+rule download_koref:
     output:
-        fasta=RESULTS / "db/hg02886.fa.gz",
+        fasta=RESULTS / "db/KOREF_S1v2.1.fa.gz",
     log:
-        LOGS / "download_hg02886.log",
+        LOGS / "download_koref.log",
     resources:
         runtime="10m",
     container:
-        CONTAINERS["base"]
+        CONTAINERS["seqtk"]
     params:
-        # from https://www.ncbi.nlm.nih.gov/datasets/genome/GCA_018470455.1/
-        # cite https://www.nature.com/articles/s41586-023-05896-x
-        url="https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/018/470/455/GCA_018470455.1_HG02886.pri.mat.f1_v2/GCA_018470455.1_HG02886.pri.mat.f1_v2_genomic.fna.gz",
+        url="https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/020/497/085/GCA_020497085.1_KOREF_S1v2.1/GCA_020497085.1_KOREF_S1v2.1_genomic.fna.gz",
+        min_length=100_000
     shell:
-        "wget -nv {params.url} -O {output.fasta} 2> {log}"
+        "(wget -nv {params.url} -O - | seqtk seq -L 100000 - | gzip) > {output.fasta} 2> {log}"
 
 
 rule download_human_pangenome_assemblies:
