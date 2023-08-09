@@ -22,11 +22,11 @@ gramtools_lineages = pd.read_csv(config["gramtools_lineages"])
 GRAMTOOLS_SAMPLES = sorted(list(gramtools_lineages["strain"]))
 
 target_files = set()
-for size in config["kraken_db_size"]:
-    for d in config["kraken_wl_sizes"]:
-        k = d["k"]
-        l = d["l"]
-        target_files.add(RESULTS / f"kraken/k{k}/l{l}/{size}/db")
+# for size in config["kraken_db_size"]:
+#     for d in config["kraken_wl_sizes"]:
+#         k = d["k"]
+#         l = d["l"]
+#         target_files.add(RESULTS / f"kraken/k{k}/l{l}/{size}/db")
 
 kraken_libs = ["bacteria", "archaea", "viral", "human", "plasmid"]
 
@@ -37,9 +37,6 @@ for lib in kraken_libs:
 target_files.add(RESULTS / "db/minimap2/db.fa.gz.map-ont.mmi")
 for tech in ["illumina", "ont"]:
     target_files.add(RESULTS / f"dehumanise/summary.{tech}.csv")
-
-target_files.add(RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/hash.k2d")
-target_files.add(RESULTS / "db/HPRC/kraken/db/hash.k2d")
 
 
 localrules:

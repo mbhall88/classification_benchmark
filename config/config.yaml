@@ -1,10 +1,10 @@
 kraken_wl_sizes:
-  - k: 21
-    l: 14
-  - k: 27
-    l: 18
   - k: 35
     l: 31
+#  - k: 21
+#    l: 14
+#  - k: 27
+#    l: 18
 
 kraken_db_size:
   - "full"

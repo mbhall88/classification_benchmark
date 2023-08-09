@@ -11,7 +11,7 @@ rule sra_human_scrubber:
         LOGS / "sra_human_scrubber.log",
     threads: 4
     resources:
-        mem_mb=lambda wildcards, attempt: attempt * int(16 * GB),
+        mem_mb=lambda wildcards, attempt: attempt * int(4 * GB),
         runtime="1h",
     benchmark:
         repeat(BENCH / "dehumanise/sra/ont.tsv", REPEAT)
@@ -46,7 +46,7 @@ rule sra_human_scrubber_illumina:
         LOGS / "sra_human_scrubber_illumina.log",
     threads: 4
     resources:
-        mem_mb=lambda wildcards, attempt: attempt * int(16 * GB),
+        mem_mb=lambda wildcards, attempt: attempt * int(4 * GB),
         runtime="1h",
     benchmark:
         repeat(BENCH / "dehumanise/sra/illumina.tsv", REPEAT)
@@ -119,21 +119,29 @@ rule minimap2_human_scrubber_illumina:
         "minimap2 {params.opts} -t {threads} -o {output.aln} {input.ref} {input.r1} {input.r2} 2> {log}"
 
 
+def infer_kraken_db(wildcards):
+    if wildcards.lib == "default":
+        return RESULTS / "dehumanise/kraken/db/k35/l31/db"
+    elif wildcards.lib == "HPRC":
+        return RESULTS / "db/HPRC/kraken/db"
+    else:
+        raise NotImplementedError(f"Kraken lib {wildcards.lib} not known")
+
 rule kraken_human_classify:
     input:
-        db=rules.build_kraken_human_database.output.db,
+        db=infer_kraken_db,
         reads=rules.sra_human_scrubber.input.reads,
     output:
-        report=RESULTS / "dehumanise/kraken/classify/k{k}l{l}/metagenome.ont.k2report",
-        out=RESULTS / "dehumanise/kraken/classify/k{k}l{l}/metagenome.ont.k2",
+        report=RESULTS / "dehumanise/kraken/classify/{lib}/metagenome.ont.k2report",
+        out=RESULTS / "dehumanise/kraken/classify/{lib}/metagenome.ont.k2",
     log:
-        LOGS / "kraken_human_classify/k{k}l{l}/ont.log",
+        LOGS / "kraken_human_classify/{lib}/ont.log",
     threads: 4
     resources:
-        mem_mb=lambda wildcards, attempt: attempt * int(6 * GB),
+        mem_mb=lambda wildcards, attempt: attempt * int(8 * GB),
         runtime=lambda wildcards, attempt: f"{30 * attempt}m",
     benchmark:
-        repeat(BENCH / "dehumanise/kraken/k{k}l{l}/ont.tsv", REPEAT)
+        repeat(BENCH / "dehumanise/kraken/{lib}/ont.tsv", REPEAT)
     container:
         CONTAINERS["kraken"]
     params:
@@ -147,21 +155,21 @@ rule kraken_human_classify:
 
 rule kraken_human_classify_illumina:
     input:
-        db=rules.build_kraken_human_database.output.db,
+        db=infer_kraken_db,
         r1=rules.sra_human_scrubber_illumina.input.r1,
         r2=rules.sra_human_scrubber_illumina.input.r2,
     output:
         report=RESULTS
-        / "dehumanise/kraken/classify/k{k}l{l}/metagenome.illumina.k2report",
-        out=RESULTS / "dehumanise/kraken/classify/k{k}l{l}/metagenome.illumina.k2",
+        / "dehumanise/kraken/classify/{lib}/metagenome.illumina.k2report",
+        out=RESULTS / "dehumanise/kraken/classify/{lib}/metagenome.illumina.k2",
     log:
-        LOGS / "kraken_human_classify/k{k}l{l}/illumina.log",
+        LOGS / "kraken_human_classify/{lib}/illumina.log",
     threads: 4
     resources:
-        mem_mb=lambda wildcards, attempt: attempt * int(6 * GB),
+        mem_mb=lambda wildcards, attempt: attempt * int(8 * GB),
         runtime=lambda wildcards, attempt: f"{30 * attempt}m",
     benchmark:
-        repeat(BENCH / "dehumanise/kraken/k{k}l{l}/illumina.tsv", REPEAT)
+        repeat(BENCH / "dehumanise/kraken/{lib}/illumina.tsv", REPEAT)
     container:
         CONTAINERS["kraken"]
     params:

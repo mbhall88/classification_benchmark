@@ -113,11 +113,11 @@ rule kraken_dehumanise_classification:
     input:
         truth=RESULTS / "assess/read2taxonomy.{tech}.tsv",
         classification=RESULTS
-        / "dehumanise/kraken/classify/k{k}l{l}/metagenome.{tech}.k2",
+        / "dehumanise/kraken/classify/{lib}/metagenome.{tech}.k2",
     output:
-        classification=RESULTS / "dehumanise/classifications.kraken.k{k}l{l}.{tech}.tsv",
+        classification=RESULTS / "dehumanise/classifications.kraken.{lib}.{tech}.tsv",
     log:
-        LOGS / "kraken_dehumanise_classification/k{k}l{l}/{tech}.log",
+        LOGS / "kraken_dehumanise_classification/{lib}/{tech}.log",
     resources:
         runtime="15m",
         mem_mb=int(4 * GB),
@@ -183,9 +183,8 @@ tools = [
     "hostile",
     "minimap2",
     "miniwinnow",
-    "kraken.k21l14",
-    "kraken.k27l18",
-    "kraken.k35l31",
+    "kraken.default",
+    "kraken.HPRC",
 ]
 
 
