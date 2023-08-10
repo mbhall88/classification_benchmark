@@ -397,8 +397,8 @@ rule build_human_pangenome_kraken_db:
     log:
         LOGS / "build_human_pangenome_kraken_db.log",
     resources:
-        runtime="2d",
-        mem_mb=int(64 * GB),
+        runtime="1d",
+        mem_mb=int(16 * GB),
     threads: 16
     container:
         CONTAINERS["kraken"]
@@ -413,7 +413,7 @@ rule build_human_pangenome_kraken_db:
         >&2 echo "Downloading taxonomy..."
         kraken2-build --download-taxonomy --db {output.db}
         >&2 echo "Adding to library..."
-        kraken2-build --add-to-library {input.fasta} --db {output.db} --no-masking
+        kraken2-build --add-to-library {input.fasta} --db {output.db}
         >&2 echo "Building..."
         kraken2-build --build --db {output.db} --threads {threads}
         #>&2 echo "Cleaning..."
