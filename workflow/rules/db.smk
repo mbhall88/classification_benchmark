@@ -534,3 +534,45 @@ rule mycobacterium_full_tree:
         find $(realpath {input.genomes}) -type f > $fofn
         mashtree --file-of-files $fofn --numcpus {threads} --outtree {output.tree} --outmatrix {output.matrix} 2> {log}
         """
+
+rule create_minimap2_mycobacterium_db:
+    input:
+        extras=rules.download_mtb_lineage_refs.output.asms
+    output:
+        db=RESULTS / "db/GTDB_genus_Mycobacterium/Mycobacterium.rep.fna.gz"
+    log:
+        LOGS / "create_minimap2_mycobacterium_db.log"
+    resources:
+        runtime="30m"
+    threads: 2
+    conda:
+        ENVS / "genome_updater.yaml"
+    params:
+        exclude=rules.prepare_mycobacterium_for_kraken.params.exclude,
+        opts='-d "refseq" -g "bacteria" -T "g__Mycobacterium" -f "genomic.fna.gz" -M "gtdb" -A 1 -m'
+    shell:
+        """
+        exec 2> {log}
+        cat {input.extras} > {output.db}
+        tmpd=$(mktemp -d)
+        version="version"
+        genome_updater.sh {params.opts} -t {threads} -o $tmpd -b "$version"
+        (find $tmpd -type f -name '*.fna.gz' -print0 | xargs cat) >> {output.db}
+        """
+
+rule create_minimap2_mtb_db:
+    input:
+        extras=rules.download_mtb_lineage_refs.output.asms
+    output:
+        db=RESULTS / "db/GTDB_genus_Mycobacterium/MTB.fna.gz"
+    log:
+        LOGS / "create_minimap2_mtb_db.log"
+    resources:
+        runtime="5m"
+    params:
+        url="https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/195/955/GCA_000195955.2_ASM19595v2/GCA_000195955.2_ASM19595v2_genomic.fna.gz"
+    shell:
+        """
+        cat {input.extras} > {output.db}" 2> {log}
+        wget {params.url} -O - >> {output.db} 2>> {log}
+        """
