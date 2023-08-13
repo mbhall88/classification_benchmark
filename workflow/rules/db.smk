@@ -343,6 +343,20 @@ rule download_chm13:
     shell:
         "wget {params.url} -O {output.fasta} 2> {log}"
 
+rule index_chm13_minimap2:
+    input:
+        fasta=rules.download_chm13.output.fasta
+    output:
+        index=RESULTS / "db/chm13.{preset}.mm2"
+    log:
+        LOGS / "index_chm13_minimap2/{preset}.log"
+    resources:
+        mem_mb=int(14 * GB),
+        runtime="5m"
+    container:
+        CONTAINERS["minimap2"]
+    shell:
+        "minimap2 -d {output.index} -x {wildcards.preset} {input.fasta} &> {log}"
 
 rule download_human_pangenome_assemblies:
     input:
