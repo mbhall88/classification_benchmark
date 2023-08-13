@@ -9,6 +9,7 @@ from collections import Counter
 DELIM = ","
 SIGFIG = 4
 
+
 def summary(counts: Counter) -> tuple[int, int, int, int, float, float, float]:
     fns = counts["FN"]
     tps = counts["TP"]
@@ -17,14 +18,13 @@ def summary(counts: Counter) -> tuple[int, int, int, int, float, float, float]:
 
     precision = round(tps / (tps + fps), SIGFIG)
     sn = round(tps / (tps + fns), SIGFIG)
-    f1 = round((2 * tps)/((2*tps) + fps + fns), SIGFIG)
+    f1 = round((2 * tps) / ((2 * tps) + fps + fns), SIGFIG)
 
     return fns, fps, tns, tps, sn, precision, f1
 
 
 def main():
     data = {}
-    is_illumina = "illumina" in snakemake.output.summary
     n_reads = None
     for p in map(Path, snakemake.input.classifications):
         tool = p.name.split(".", maxsplit=1)[1].rsplit(".", maxsplit=2)[0]
@@ -32,10 +32,7 @@ def main():
         if n_reads is None:
             n_reads = len(df)
         else:
-            if is_illumina and tool.startswith("kraken"):
-                assert len(df) == n_reads / 2, f"different number of reads in {tool}"
-            else:
-                assert len(df) == n_reads, f"different number of reads in {tool}"
+            assert len(df) == n_reads, f"different number of reads in {tool}"
 
         counts = Counter(df["classification"])
         data[tool] = counts
