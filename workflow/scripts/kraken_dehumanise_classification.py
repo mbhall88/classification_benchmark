@@ -62,7 +62,11 @@ def main():
                     else:
                         clf = TN
 
-                print(f"{read_id}{DELIM}{clf}", file=fd_out)
+                if is_illumina:
+                    print(f"{read_id}/1{DELIM}{clf}", file=fd_out)
+                    print(f"{read_id}/2{DELIM}{clf}", file=fd_out)
+                else:
+                    print(f"{read_id}{DELIM}{clf}", file=fd_out)
 
     truth_read_ids = set(truth.keys())
     if is_illumina:
