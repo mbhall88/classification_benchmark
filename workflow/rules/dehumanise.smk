@@ -77,7 +77,7 @@ rule sra_human_scrubber_illumina:
 rule minimap2_human_scrubber:
     input:
         reads=rules.sra_human_scrubber.input.reads,
-        ref=rules.download_chm13.output.fasta,
+        index=RESULTS / "db/chm13.map-ont.mm2"
     output:
         aln=RESULTS / "dehumanise/minimap2/metagenome.aln.ont.paf",
     log:
@@ -93,14 +93,14 @@ rule minimap2_human_scrubber:
     params:
         opts="-x map-ont --paf-no-hit",
     shell:
-        "minimap2 {params.opts} -t {threads} -o {output.aln} {input.ref} {input.reads} 2> {log}"
+        "minimap2 {params.opts} -t {threads} -o {output.aln} {input.index} {input.reads} 2> {log}"
 
 
 rule minimap2_human_scrubber_illumina:
     input:
         r1=rules.sra_human_scrubber_illumina.input.r1,
         r2=rules.sra_human_scrubber_illumina.input.r2,
-        ref=rules.download_chm13.output.fasta,
+        index=RESULTS / "db/chm13.sr.mm2"
     output:
         aln=RESULTS / "dehumanise/minimap2/metagenome.aln.illumina.paf",
     log:
@@ -116,7 +116,7 @@ rule minimap2_human_scrubber_illumina:
     params:
         opts="-x sr --paf-no-hit",
     shell:
-        "minimap2 {params.opts} -t {threads} -o {output.aln} {input.ref} {input.r1} {input.r2} 2> {log}"
+        "minimap2 {params.opts} -t {threads} -o {output.aln} {input.index} {input.r1} {input.r2} 2> {log}"
 
 
 def infer_kraken_db(wildcards):
