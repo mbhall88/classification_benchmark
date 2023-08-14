@@ -277,7 +277,7 @@ rule index_db_with_minimap2:
     container:
         CONTAINERS["minimap2"]
     params:
-        opts="-x {preset} -I 12G --idx-no-seq",
+        opts="-x {preset} -I 12G",
     shell:
         "minimap2 {params.opts} -t {threads} -d {output.index} {input.fasta} 2> {log}"
 

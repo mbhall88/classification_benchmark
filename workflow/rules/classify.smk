@@ -85,7 +85,7 @@ rule minimap2_classify:
     output:
         aln=RESULTS / "classify/minimap2/aln.{db}.{tech}.paf",
     log:
-        LOGS / "minimap2_classify_clockwork/{db}/{tech}.log",
+        LOGS / "minimap2_classify/{db}/{tech}.log",
     resources:
         runtime="2h",
         mem_mb=int(16 * GB),
