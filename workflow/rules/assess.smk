@@ -68,6 +68,8 @@ rule sra_human_scrubber_classifications:
         runtime="15m",
     container:
         CONTAINERS["pysam"]
+    params:
+        ignore_unmapped=True
     script:
         SCRIPTS / "sra_human_scrubber_classifications.py"
 
@@ -88,6 +90,8 @@ rule sra_human_scrubber_classifications_illumina:
         mem_mb=int(4 * GB),
     container:
         CONTAINERS["pysam"]
+    params:
+        ignore_unmapped=True
     script:
         SCRIPTS / "sra_human_scrubber_classifications.py"
 
@@ -105,6 +109,8 @@ rule minimap2_dehumanise_classification:
         mem_mb=int(4 * GB),
     conda:
         ENVS / "minimap2_dehumanise_classification.yaml"
+    params:
+        ignore_unmapped=True
     script:
         SCRIPTS / "minimap2_dehumanise_classification.py"
 
@@ -123,6 +129,8 @@ rule kraken_dehumanise_classification:
         mem_mb=int(4 * GB),
     container:
         CONTAINERS["python"]
+    params:
+        ignore_unmapped=True
     script:
         SCRIPTS / "kraken_dehumanise_classification.py"
 
@@ -139,6 +147,8 @@ rule miniwinnow_dehumanise_classification:
         runtime="10m",
     conda:
         ENVS / "minimap2_dehumanise_classification.yaml"
+    params:
+        ignore_unmapped=True
     script:
         SCRIPTS / "miniwinnow_dehumanise_classification.py"
 
@@ -156,6 +166,8 @@ rule hostile_human_scrubber_classifications:
         mem_mb=int(4 * GB),
     container:
         CONTAINERS["pysam"]
+    params:
+        ignore_unmapped=True
     script:
         SCRIPTS / "hostile_human_scrubber_classification.py"
 
@@ -174,6 +186,8 @@ rule hostile_human_scrubber_classifications_illumina:
         mem_mb=int(4 * GB),
     container:
         CONTAINERS["pysam"]
+    params:
+        ignore_unmapped=True
     script:
         SCRIPTS / "hostile_human_scrubber_classification.py"
 

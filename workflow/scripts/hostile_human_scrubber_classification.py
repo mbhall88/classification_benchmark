@@ -10,6 +10,7 @@ FN = "FN"
 TN = "TN"
 FP = "FP"
 TP = "TP"
+NA = "NA"
 HUMAN_SPECIES_ID = "9606"
 
 COLUMNS = [
@@ -27,6 +28,9 @@ def classify_kept(read_id, truth) -> str:
     if species_id is None:
         raise KeyError(f"{read_id} is not in truth")
 
+    if not species_id and snakemake.params.ignore_unmapped:  # unmapped reads
+        return NA
+
     if species_id == HUMAN_SPECIES_ID:
         return FN
     else:
@@ -37,6 +41,9 @@ def classify_scrubbed(read_id, truth) -> str:
     species_id = truth.get(read_id, dict()).get("species_id")
     if species_id is None:
         raise KeyError(f"{read_id} is not in truth")
+
+    if not species_id and snakemake.params.ignore_unmapped:  # unmapped reads
+        return NA
 
     if species_id == HUMAN_SPECIES_ID:
         return TP
