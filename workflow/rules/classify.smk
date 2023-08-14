@@ -89,6 +89,8 @@ rule minimap2_classify:
     threads: 4
     container:
         CONTAINERS["minimap2"]
+    benchmark:
+        repeat(BENCH / "classify/minimap2/{db}/{tech}.tsv", 1)
     params:
         opts="--secondary=no -c",
         preset=lambda wildcards: PRESETS[wildcards.tech],
@@ -123,6 +125,8 @@ rule kraken_classify:
         else int(12 * GB),
     container:
         CONTAINERS["kraken"]
+    benchmark:
+        repeat(BENCH / "classify/kraken/{db}/{tech}.tsv", 1)
     params:
         opts="--minimum-hit-groups 3 --report-minimizer-data",
         tech_opts=lambda wildcards: "--paired" if wildcards.tech == "illumina" else "",
