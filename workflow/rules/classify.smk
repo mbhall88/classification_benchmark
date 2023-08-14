@@ -89,13 +89,17 @@ rule minimap2_classify:
     resources:
         runtime="2h",
         mem_mb=int(16 * GB),
+    threads: 4
     container:
         CONTAINERS["minimap2"]
     params:
         opts="--secondary=no -c",
         preset=lambda wildcards: PRESETS[wildcards.tech],
     shell:
-        "minimap2 {params.opts} -x {params.preset} -o {output.aln} {input.db} {input.reads} 2> {log}"
+        """
+        minimap2 {params.opts} -x {params.preset} -o {output.aln} -t {threads} \
+            {input.db} {input.reads} 2> {log}
+        """
 
 
 CLASSIFY_DBS = {
