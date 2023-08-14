@@ -561,7 +561,7 @@ rule create_minimap2_mtb_db:
         url="https://ftp.ncbi.nlm.nih.gov/genomes/all/GCA/000/195/955/GCA_000195955.2_ASM19595v2/GCA_000195955.2_ASM19595v2_genomic.fna.gz"
     shell:
         """
-        cat {input.extras} > {output.db}" 2> {log}
+        cat {input.extras} > {output.db} 2> {log}
         wget {params.url} -O - >> {output.db} 2>> {log}
         """
 
