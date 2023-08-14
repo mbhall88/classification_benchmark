@@ -10,6 +10,7 @@ FN = "FN"
 TN = "TN"
 FP = "FP"
 TP = "TP"
+NA = "NA"
 HUMAN_SPECIES_ID = "9606"
 COLUMNS = [
     "strain_id",
@@ -42,7 +43,9 @@ def main():
                 if read_tax is None:
                     raise KeyError(f"{read_id} not in truth")
                 read_is_human = read_tax["species_id"] == HUMAN_SPECIES_ID
-                if record.is_unmapped():
+                if snakemake.params.ignore_unmapped and not read_tax["species_id"]:
+                    clf = NA
+                elif record.is_unmapped():
                     if read_is_human:
                         clf = FN
                     else:
