@@ -1,5 +1,3 @@
-
-
 rule download_kraken_taxonomy:
     output:
         names=RESULTS / "kraken/db/taxonomy/names.dmp",
@@ -37,27 +35,6 @@ rule download_kraken_bacteria_db:
         """
         k2 download-library --db {params.db} --library bacteria 2> {log}
         """
-
-
-rule download_kraken_archaea_db:
-    input:
-        rules.download_kraken_taxonomy.output.names,
-    output:
-        fasta=RESULTS / "kraken/db/library/archaea/library.fna",
-    resources:
-        mem_mb=int(8 * GB),
-        runtime="1w",
-    container:
-        CONTAINERS["kraken"]
-    params:
-        db=lambda wildcards, input: Path(input[0]).parent.parent,
-    log:
-        LOGS / "download_kraken_archaea_db.log",
-    shell:
-        """
-        k2 download-library --db {params.db} --library archaea 2> {log}
-        """
-
 
 rule download_kraken_viral_db:
     input:
@@ -99,25 +76,6 @@ rule download_kraken_human_db:
         """
 
 
-rule download_kraken_plasmid_db:
-    input:
-        rules.download_kraken_taxonomy.output.names,
-    output:
-        fasta=RESULTS / "kraken/db/library/plasmid/library.fna",
-    resources:
-        mem_mb=int(8 * GB),
-        runtime="1w",
-    container:
-        CONTAINERS["kraken"]
-    params:
-        db=lambda wildcards, input: Path(input[0]).parent.parent,
-    log:
-        LOGS / "download_kraken_plasmid_db.log",
-    shell:
-        """
-        k2 download-library --db {params.db} --library plasmid 2> {log}
-        """
-
 
 def infer_max_db_size_opt(wildcards):
     if wildcards.size == "full":
@@ -130,35 +88,6 @@ def infer_minimizer_spaces(wildcards):
     l = int(wildcards.l)
     s = int(l / 4)
     return f"--minimizer-spaces {s}"
-
-
-rule build_kraken_database:
-    input:
-        libs=[RESULTS / f"kraken/db/library/{lib}/library.fna" for lib in kraken_libs],
-    output:
-        db=directory(RESULTS / "kraken/k{k}/l{l}/{size}/db"),
-    log:
-        LOGS / "build_kraken_database/k{k}/l{l}/{size}.log",
-    threads: 16
-    resources:
-        mem_mb=lambda wildcards, attempt: int(80 * GB) * attempt,
-        runtime=lambda wildcards, attempt: f"{2*attempt}d",
-    benchmark:
-        BENCH / "kraken/build/k{k}/l{l}/{size}.tsv"
-    params:
-        opts="--kmer-len {k} --minimizer-len {l}",
-        max_db_size=infer_max_db_size_opt,
-        spaces=infer_minimizer_spaces,
-        original_db=lambda wildcards, input: Path(input.libs[0]).parent.parent.parent,
-    container:
-        CONTAINERS["kraken"]
-    shell:
-        """
-        echo "Copying original db" > {log}
-        cp -r {params.original_db} {output.db} 2>> {log}
-        echo "Finished copying db" >> {log}
-        k2 build {params.opts} {params.max_db_size} {params.spaces} --threads {threads} --db {output.db} &>> {log}
-        """
 
 
 rule build_kraken_human_database:
@@ -188,6 +117,33 @@ rule build_kraken_human_database:
         k2 build {params.opts} {params.spaces} --threads {threads} --db {output.db} &>> {log}
         """
 
+
+KRAKEN_URLS = {
+    "standard": "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_20230605.tar.gz",
+    "standard-8": "https://genome-idx.s3.amazonaws.com/kraken/k2_standard_08gb_20230605.tar.gz"
+}
+
+rule download_kraken_db:
+    output:
+        db=directory(RESULTS / "db/kraken/{db}")
+    log:
+        LOGS / "download_kraken_db/{db}.log"
+    resources:
+        runtime="1h"
+    container:
+        CONTAINERS["base"]
+    params:
+        url=lambda wildcards: KRAKEN_URLS[wildcards.db]
+    shell:
+        """
+        exec &> {log}
+        tmpf$(mktemp -u)
+        trap "rm -f $tmpf" EXIT
+        wget {params.url} -O $tmpf
+        mkdir -p {output.db}
+        tar xzf $tmpf -C {output.db}
+        rm {output.db}/database*
+        """
 
 rule build_decontamination_db:
     output:

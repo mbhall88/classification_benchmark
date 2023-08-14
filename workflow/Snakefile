@@ -41,6 +41,13 @@ for tech in ["illumina", "ont"]:
 target_files.add(RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/hash.k2d")
 
 
+for tech in ["ont", "illumina"]:
+    for db in ["standard", "standard-8", "mycobacterium"]:
+        target_files.add(RESULTS / f"classify/kraken/{db}.{tech}.k2")
+    for db in ["clockwork", "mtbc", "mycobacterium"]:
+        target_files.add(RESULTS / f"classify/minimap2/aln.{db}.{tech}.paf")
+
+
 localrules:
     all,
 
@@ -53,4 +60,5 @@ rule all:
 include: RULES / "db.smk"
 include: RULES / "simulate.smk"
 include: RULES / "dehumanise.smk"
+include: RULES / "classify.smk"
 include: RULES / "assess.smk"

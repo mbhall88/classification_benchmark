@@ -74,7 +74,7 @@ def infer_minimap2_db(wildcards):
 PRESETS = {"ont": "map-ont", "illumina": "sr"}
 
 
-rule minimap2_classify_clockwork:
+rule minimap2_classify:
     input:
         reads=infer_classify_reads,
         db=rules.faidx_db.output.fasta,
@@ -94,6 +94,38 @@ rule minimap2_classify_clockwork:
         "minimap2 {params.opts} -x {params.preset} -o {output.aln} {input.db} {input.reads} 2> {log}"
 
 
-# todo: kraken - default db
-# todo: kraken - default small db
-# todo: kraken - Myco db
+CLASSIFY_DBS = {
+    "standard": RESULTS / "db/kraken/standard",
+    "standard-8": RESULTS / "db/kraken/standard-8",
+    "mycobacterium": RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/hash.k2d",
+}
+
+
+rule kraken_classify:
+    input:
+        reads=infer_classify_reads,
+        db=lambda wildcards: CLASSIFY_DBS,
+    output:
+        report=RESULTS / "classify/kraken/{db}.{tech}.k2report",
+        out=RESULTS / "classify/kraken/{db}.{tech}.k2",
+    log:
+        LOGS / "kraken_classify/{db}/{tech}.log",
+    threads: 4
+    resources:
+        runtime="20m",
+        mem_mb=lambda wildcards: int(70 * GB)
+        if wildcards.db == "standard"
+        else int(12 * GB),
+    container:
+        CONTAINERS["kraken"]
+    params:
+        opts="--minimum-hit-groups 3 --report-minimizer-data",
+        tech_opts=lambda wildcards: "--paired" if wildcards.tech == "illumina" else "",
+        db=lambda wildcards, input: Path(input.db).parent
+        if wildcards.db == "mycobacterium"
+        else input.db,
+    shell:
+        """
+        kraken2 {params.opts} {params.tech_opts} --threads {threads} --db {params.db} \
+            --report {output.report} --output {output.out} {input.reads} 2> {log}
+        """
