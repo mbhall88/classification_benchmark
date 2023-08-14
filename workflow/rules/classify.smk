@@ -78,7 +78,7 @@ PRESETS = {"ont": "map-ont", "illumina": "sr"}
 rule minimap2_classify:
     input:
         reads=infer_classify_reads,
-        db=lambda wildcards: IDX_PRESET[wildcards.tech],
+        db=infer_minimap2_db,
     output:
         aln=RESULTS / "classify/minimap2/aln.{db}.{tech}.paf",
     log:
