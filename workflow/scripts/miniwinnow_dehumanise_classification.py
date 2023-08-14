@@ -66,7 +66,10 @@ def main():
             if read_tax is None:
                 raise KeyError(f"{read_id} not in truth")
             read_is_human = read_tax["species_id"] == HUMAN_SPECIES_ID
-            if read_is_human:
+            
+            if snakemake.params.ignore_unmapped and not read_tax["species_id"]:
+                clf = NA
+            elif read_is_human:
                 # read is human but was filtered out before winnowmap
                 clf = TP
             else:
