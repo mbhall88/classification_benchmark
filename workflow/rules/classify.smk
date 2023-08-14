@@ -63,7 +63,7 @@ def infer_classify_reads(wildcards):
 def infer_minimap2_db(wildcards):
     preset = PRESETS[wildcards.tech]
     if wildcards.db == "clockwork":
-        return RESULTS / "db/minimap2/db.fa.gz.{preset}.mmi"
+        return RESULTS / f"db/minimap2/db.fa.gz.{preset}.mmi"
     elif wildcards.db == "mtbc":
         return RESULTS / f"db/GTDB_genus_Mycobacterium/MTB.{preset}.mmi"
     elif wildcards.db == "mycobacterium":
