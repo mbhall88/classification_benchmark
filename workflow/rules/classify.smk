@@ -104,7 +104,7 @@ CLASSIFY_DBS = {
 rule kraken_classify:
     input:
         reads=infer_classify_reads,
-        db=lambda wildcards: CLASSIFY_DBS,
+        db=lambda wildcards: CLASSIFY_DBS[wildcards.db],
     output:
         report=RESULTS / "classify/kraken/{db}.{tech}.k2report",
         out=RESULTS / "classify/kraken/{db}.{tech}.k2",
