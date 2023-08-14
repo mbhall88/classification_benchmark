@@ -267,7 +267,7 @@ rule index_db_with_minimap2:
     input:
         fasta=rules.faidx_db.output.fasta,
     output:
-        index=RESULTS / "db/minimap2/db.fa.gz.{preset}.mmi",
+        index=RESULTS / "db/minimap2/db.{preset}.mmi",
     resources:
         mem_mb=lambda wildcards, attempt: attempt * int(32 * GB),
         runtime="5m",
