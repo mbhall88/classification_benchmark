@@ -118,7 +118,7 @@ rule kraken_classify:
     threads: 4
     resources:
         runtime="20m",
-        mem_mb=lambda wildcards: int(70 * GB)
+        mem_mb=lambda wildcards: int(80 * GB)
         if wildcards.db == "standard"
         else int(12 * GB),
     container:
