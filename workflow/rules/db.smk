@@ -267,19 +267,17 @@ rule index_db_with_minimap2:
     input:
         fasta=rules.faidx_db.output.fasta,
     output:
-        index=RESULTS / "db/minimap2/db.fa.gz.map-ont.mmi",
+        index=RESULTS / "db/minimap2/db.fa.gz.{preset}.mmi",
     resources:
         mem_mb=lambda wildcards, attempt: attempt * int(32 * GB),
         runtime="5m",
-    benchmark:
-        BENCH / "minimap2/index.tsv"
     log:
-        LOGS / "index_decontam_db_with_minimap2.log",
+        LOGS / "index_decontam_db_with_minimap2/{preset}.log",
     threads: 4
     container:
         CONTAINERS["minimap2"]
     params:
-        opts="-x map-ont -I 12G --idx-no-seq",
+        opts="-x {preset} -I 12G --idx-no-seq",
     shell:
         "minimap2 {params.opts} -t {threads} -d {output.index} {input.fasta} 2> {log}"
 

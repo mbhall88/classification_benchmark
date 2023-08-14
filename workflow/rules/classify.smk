@@ -72,12 +72,16 @@ def infer_minimap2_db(wildcards):
 
 
 PRESETS = {"ont": "map-ont", "illumina": "sr"}
+IDX_PRESET = {
+    "ont": RESULTS / "db/minimap2/db.fa.gz.map-ont.mmi",
+    "illumina": RESULTS / "db/minimap2/db.fa.gz.sr.mmi",
+}
 
 
 rule minimap2_classify:
     input:
         reads=infer_classify_reads,
-        db=rules.faidx_db.output.fasta,
+        db=lambda wildcards: IDX_PRESET[wildcards.tech],
     output:
         aln=RESULTS / "classify/minimap2/aln.{db}.{tech}.paf",
     log:
