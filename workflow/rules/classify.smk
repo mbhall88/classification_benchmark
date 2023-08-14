@@ -61,21 +61,18 @@ def infer_classify_reads(wildcards):
 
 
 def infer_minimap2_db(wildcards):
+    preset = PRESETS[wildcards.tech]
     if wildcards.db == "clockwork":
-        return RESULTS / "db/db.fa.gz"
+        return RESULTS / "db/minimap2/db.fa.gz.{preset}.mmi"
     elif wildcards.db == "mtbc":
-        return RESULTS / "db/GTDB_genus_Mycobacterium/MTB.fna.gz"
+        return RESULTS / f"db/GTDB_genus_Mycobacterium/MTB.{preset}.mmi"
     elif wildcards.db == "mycobacterium":
-        return RESULTS / "db/GTDB_genus_Mycobacterium/Mycobacterium.rep.fna.gz"
+        return RESULTS / f"db/GTDB_genus_Mycobacterium/Mycobacterium.rep.{preset}.mmi"
     else:
         raise ValueError(f"Don't recognise db {wildcards.db}")
 
 
 PRESETS = {"ont": "map-ont", "illumina": "sr"}
-IDX_PRESET = {
-    "ont": RESULTS / "db/minimap2/db.fa.gz.map-ont.mmi",
-    "illumina": RESULTS / "db/minimap2/db.fa.gz.sr.mmi",
-}
 
 
 rule minimap2_classify:

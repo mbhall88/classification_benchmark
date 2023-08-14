@@ -528,6 +528,26 @@ rule create_minimap2_mycobacterium_db:
         (find $tmpd -type f -name '*.fna.gz' -print0 | xargs cat) >> {output.db}
         """
 
+
+rule index_mycobacterium_db_minimap2:
+    input:
+        fasta=rules.create_minimap2_mycobacterium_db.output.db,
+    output:
+        index=RESULTS / "db/GTDB_genus_Mycobacterium/Mycobacterium.rep.{preset}.mmi",
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * int(16 * GB),
+        runtime="5m",
+    log:
+        LOGS / "index_mycobacterium_db_minimap2/{preset}.log",
+    threads: 4
+    container:
+        CONTAINERS["minimap2"]
+    params:
+        opts="-x {preset} -I 12G",
+    shell:
+        "minimap2 {params.opts} -t {threads} -d {output.index} {input.fasta} 2> {log}"
+
+
 rule create_minimap2_mtb_db:
     input:
         extras=rules.download_mtb_lineage_refs.output.asms
@@ -544,3 +564,23 @@ rule create_minimap2_mtb_db:
         cat {input.extras} > {output.db}" 2> {log}
         wget {params.url} -O - >> {output.db} 2>> {log}
         """
+
+
+rule index_mtb_db_minimap2:
+    input:
+        fasta=rules.create_minimap2_mtb_db.output.db,
+    output:
+        index=RESULTS / "db/GTDB_genus_Mycobacterium/MTB.{preset}.mmi",
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * int(2 * GB),
+        runtime="5m",
+    log:
+        LOGS / "index_mtb_db_minimap2/{preset}.log",
+    threads: 4
+    container:
+        CONTAINERS["minimap2"]
+    params:
+        opts="-x {preset}",
+    shell:
+        "minimap2 {params.opts} -t {threads} -d {output.index} {input.fasta} 2> {log}"
+
