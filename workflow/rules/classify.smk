@@ -85,7 +85,7 @@ rule minimap2_classify:
         LOGS / "minimap2_classify/{db}/{tech}.log",
     resources:
         runtime="2h",
-        mem_mb=int(16 * GB),
+        mem_mb=int(20 * GB),
     threads: 4
     container:
         CONTAINERS["minimap2"]
