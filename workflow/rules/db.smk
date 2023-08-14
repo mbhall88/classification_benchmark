@@ -137,7 +137,7 @@ rule download_kraken_db:
     shell:
         """
         exec &> {log}
-        tmpf$(mktemp -u)
+        tmpf=$(mktemp -u)
         trap "rm -f $tmpf" EXIT
         wget {params.url} -O $tmpf
         mkdir -p {output.db}
