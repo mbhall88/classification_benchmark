@@ -512,7 +512,7 @@ rule create_minimap2_mycobacterium_db:
         LOGS / "create_minimap2_mycobacterium_db.log"
     resources:
         runtime="30m"
-    threads: 2
+    threads: 4
     conda:
         ENVS / "genome_updater.yaml"
     params:
