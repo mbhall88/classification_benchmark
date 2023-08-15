@@ -236,6 +236,7 @@ rule combine_simulated_reads:
         fastqs=[
             RESULTS / f"simulate/reads/{read_type}.ont.fq.gz"
             for read_type in config["simulate"]["proportions"]
+            if read_type != "Unmapped"
         ],
         script=SCRIPTS / "filter_ambig.py",
     output:
@@ -329,12 +330,14 @@ rule combine_illumina_simulated_reads:
             [
                 RESULTS / f"simulate/reads/{read_type}_R1.illumina.fq.gz"
                 for read_type in config["simulate"]["proportions"]
+                if read_type != "Unmapped"
             ]
         ),
         r2s=sorted(
             [
                 RESULTS / f"simulate/reads/{read_type}_R2.illumina.fq.gz"
                 for read_type in config["simulate"]["proportions"]
+                if read_type != "Unmapped"
             ]
         ),
         script=SCRIPTS / "filter_ambig.py",
