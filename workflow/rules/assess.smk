@@ -69,7 +69,7 @@ rule sra_human_scrubber_classifications:
     container:
         CONTAINERS["pysam"]
     params:
-        ignore_unmapped=True
+        ignore_unmapped=True,
     script:
         SCRIPTS / "sra_human_scrubber_classifications.py"
 
@@ -91,7 +91,7 @@ rule sra_human_scrubber_classifications_illumina:
     container:
         CONTAINERS["pysam"]
     params:
-        ignore_unmapped=True
+        ignore_unmapped=True,
     script:
         SCRIPTS / "sra_human_scrubber_classifications.py"
 
@@ -110,7 +110,7 @@ rule minimap2_dehumanise_classification:
     conda:
         ENVS / "minimap2_dehumanise_classification.yaml"
     params:
-        ignore_unmapped=True
+        ignore_unmapped=True,
     script:
         SCRIPTS / "minimap2_dehumanise_classification.py"
 
@@ -118,8 +118,7 @@ rule minimap2_dehumanise_classification:
 rule kraken_dehumanise_classification:
     input:
         truth=RESULTS / "assess/read2taxonomy.{tech}.tsv",
-        classification=RESULTS
-        / "dehumanise/kraken/classify/{lib}/metagenome.{tech}.k2",
+        classification=RESULTS / "dehumanise/kraken/classify/{lib}/metagenome.{tech}.k2",
     output:
         classification=RESULTS / "dehumanise/classifications.kraken.{lib}.{tech}.tsv",
     log:
@@ -130,7 +129,7 @@ rule kraken_dehumanise_classification:
     container:
         CONTAINERS["python"]
     params:
-        ignore_unmapped=True
+        ignore_unmapped=True,
     script:
         SCRIPTS / "kraken_dehumanise_classification.py"
 
@@ -148,7 +147,7 @@ rule miniwinnow_dehumanise_classification:
     conda:
         ENVS / "minimap2_dehumanise_classification.yaml"
     params:
-        ignore_unmapped=True
+        ignore_unmapped=True,
     script:
         SCRIPTS / "miniwinnow_dehumanise_classification.py"
 
@@ -167,7 +166,7 @@ rule hostile_human_scrubber_classifications:
     container:
         CONTAINERS["pysam"]
     params:
-        ignore_unmapped=True
+        ignore_unmapped=True,
     script:
         SCRIPTS / "hostile_human_scrubber_classification.py"
 
@@ -187,7 +186,7 @@ rule hostile_human_scrubber_classifications_illumina:
     container:
         CONTAINERS["pysam"]
     params:
-        ignore_unmapped=True
+        ignore_unmapped=True,
     script:
         SCRIPTS / "hostile_human_scrubber_classification.py"
 
@@ -238,3 +237,24 @@ rule dehumanise_summary_statistics:
         ENVS / "datasci.yaml"
     script:
         SCRIPTS / "dehumanise_summary_statistics.py"
+
+
+rule kraken_mycobacterium_classification:
+    input:
+        truth=RESULTS / "assess/read2taxonomy.{tech}.tsv",
+        classification=rules.kraken_classify.output.out,
+        names=rules.download_kraken_taxonomy.output.names,
+        nodes=rules.download_kraken_taxonomy.output.nodes,
+    output:
+        classification=RESULTS / "classify/classifications.kraken.{db}.{tech}.tsv",
+    log:
+        LOGS / "kraken_mycobacterium_classification/{db}/{tech}.log",
+    resources:
+        runtime="15m",
+        mem_mb=int(2 * GB),
+    conda:
+        ENVS / "accession2taxonomy.yaml"
+    params:
+        ignore_unmapped=True,
+    script:
+        SCRIPTS / "kraken_mycobacterium_classification.py"

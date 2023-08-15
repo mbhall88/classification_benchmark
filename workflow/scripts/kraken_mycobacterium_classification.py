@@ -4,6 +4,7 @@ from typing import Optional
 
 sys.stderr = open(snakemake.log[0], "w")
 
+from pathlib import Path
 import csv
 from taxonomy import Taxonomy, TaxonomyError
 
@@ -24,6 +25,7 @@ COLUMNS = [
 ]
 
 MTB_TAXID = "1773"
+UNCLASSIFIED = "0"
 MTBC_TAXID = "77643"
 MYCO_TAXIDS = {
     "1763",  # Mycobacterium
@@ -35,6 +37,8 @@ MYCO_TAXIDS = {
 
 
 def is_mtbc(taxid: str, taxtree) -> bool:
+    if taxid == UNCLASSIFIED:
+        return False
     lineage = taxtree.lineage(taxid)
     for node in lineage:
         if node.id == MTBC_TAXID:
@@ -44,6 +48,8 @@ def is_mtbc(taxid: str, taxtree) -> bool:
 
 
 def is_mtb(taxid: str, taxtree) -> bool:
+    if taxid == UNCLASSIFIED:
+        return False
     lineage = taxtree.lineage(taxid)
     for node in lineage:
         if node.id == MTB_TAXID:
@@ -53,6 +59,9 @@ def is_mtb(taxid: str, taxtree) -> bool:
 
 
 def is_mycobacterium(taxid: str, taxtree: Taxonomy) -> bool:
+    if taxid == UNCLASSIFIED:
+        return False
+
     lineage = taxtree.lineage(taxid)
     for node in lineage:
         if node.id in MYCO_TAXIDS:
@@ -62,6 +71,9 @@ def is_mycobacterium(taxid: str, taxtree: Taxonomy) -> bool:
 
 
 def is_genus_correct(true_taxid: str, called_taxid: str, taxtree: Taxonomy) -> bool:
+    if called_taxid == UNCLASSIFIED:
+        return False
+
     true_genus = taxtree.parent(true_taxid, at_rank="genus")
     called_genus = taxtree.parent(called_taxid, at_rank="genus")
     if true_genus is None:
@@ -74,6 +86,9 @@ def is_genus_correct(true_taxid: str, called_taxid: str, taxtree: Taxonomy) -> b
 
 
 def is_species_correct(true_taxid: str, called_taxid: str, taxtree: Taxonomy) -> bool:
+    if called_taxid == UNCLASSIFIED:
+        return False
+
     if is_mtbc(true_taxid, taxtree) and is_mtbc(called_taxid, taxtree):
         return True
 
@@ -112,7 +127,10 @@ def main():
             truth[row["read_id"]] = {c: row[c] for c in COLUMNS}
 
     with open(snakemake.output.classification, "w") as fd_out:
-        print(f"read_id{DELIM}classification", file=fd_out)
+        print(
+            f"read_id{DELIM}genus_classification{DELIM}species_classification",
+            file=fd_out,
+        )
         seen = set()
         with open(snakemake.input.classification) as fd_in:
             for line in map(str.rstrip, fd_in):
@@ -135,39 +153,43 @@ def main():
                 truth_taxid = read_tax["species_id"]
                 called_taxid = fields[2]
 
-                # todo check genus and species level classifications
-
                 if not truth_taxid and snakemake.params.ignore_unmapped:
-                    clf = NA
+                    genus_clf = NA
+                    species_clf = NA
                 elif not is_mycobacterium(truth_taxid, taxtree):
-                    if
-                elif taxid == HUMAN_SPECIES_ID:
-                    if read_is_human:
-                        clf = TP
+                    if is_mycobacterium(called_taxid, taxtree):
+                        genus_clf = FP
+                        species_clf = FP
                     else:
-                        clf = FP
+                        genus_clf = TN
+                        species_clf = TN
                 else:
-                    if read_is_human:
-                        clf = FN
+                    if not is_mycobacterium(called_taxid, taxtree):
+                        genus_clf = FN
+                        species_clf = FN
                     else:
-                        clf = TN
+                        if is_genus_correct(truth_taxid, called_taxid, taxtree):
+                            genus_clf = TP
+                        else:
+                            genus_clf = FN
+                        if is_species_correct(truth_taxid, called_taxid, taxtree):
+                            species_clf = TP
+                        else:
+                            species_clf = FN
 
                 if is_illumina:
-                    print(f"{read_id}/1{DELIM}{clf}", file=fd_out)
-                    print(f"{read_id}/2{DELIM}{clf}", file=fd_out)
+                    print(
+                        f"{read_id}/1{DELIM}{genus_clf}{DELIM}{species_clf}",
+                        file=fd_out,
+                    )
+                    print(
+                        f"{read_id}/2{DELIM}{genus_clf}{DELIM}{species_clf}",
+                        file=fd_out,
+                    )
                 else:
-                    print(f"{read_id}{DELIM}{clf}", file=fd_out)
-
-    truth_read_ids = set(truth.keys())
-    if is_illumina:
-        new_seen = set()
-        for readid in seen:
-            for i in [1, 2]:
-                new_seen.add(f"{readid}/{i}")
-        seen = new_seen
-    diff = truth_read_ids.symmetric_difference(seen)
-    if len(diff) > 0:
-        raise ValueError(f"Got read differences between truth and PAF\n{diff}")
+                    print(
+                        f"{read_id}{DELIM}{genus_clf}{DELIM}{species_clf}", file=fd_out
+                    )
 
 
 main()
