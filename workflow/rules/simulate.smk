@@ -249,7 +249,7 @@ rule combine_simulated_reads:
         ENVS / "combine_simulated_reads.yaml"
     params:
         opts="-L 500",
-        max_ambig=0.05,
+        max_ambig=0,
     shell:
         "(zcat {input.fastqs} | seqtk seq {params.opts} - | python {input.script} - {params.max_ambig} | gzip) > {output.reads} 2> {log}"
 
