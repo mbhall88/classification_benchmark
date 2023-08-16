@@ -408,7 +408,7 @@ rule download_GTDB_mycobacterium:
         ENVS / "genome_updater.yaml"
     params:
         opts='-A "species:1" -m -a -M "gtdb" -f "genomic.fna.gz" -g "bacteria" -d "refseq"',
-        taxon='-T "g__Mycobacterium,c__Gammaproteobacteria,c__Bacilli"',
+        taxon='-T "g__Mycobacterium,g__Klebsiella,g__Escherichia,g__Enterobacter,g__Salmonella,g__Streptococcus,g__Staphylococcus,g__Pseudomonas,g__Xanthomonas"',
         outdir=lambda wildcards, output: Path(output.genomes).parent.parent,
         version=lambda wildcards, output: Path(output.genomes).parts[-2],
     shell:
@@ -458,7 +458,7 @@ rule build_mycobacterium_kraken_db:
     resources:
         runtime="1d",
         mem_mb=int(32 * GB),
-    threads: 16
+    threads: 32
     container:
         CONTAINERS["kraken"]
     params:
