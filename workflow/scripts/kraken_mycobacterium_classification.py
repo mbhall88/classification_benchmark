@@ -131,8 +131,8 @@ def is_species_correct(true_taxid: str, called_taxid: str, taxtree: Taxonomy) ->
     if called_taxid == UNCLASSIFIED:
         return False
 
-    if is_mtbc(true_taxid, taxtree) and is_mtbc(called_taxid, taxtree):
-        return True
+    # if is_mtbc(true_taxid, taxtree) and is_mtbc(called_taxid, taxtree):
+    #     return True
 
     true_species = taxtree.parent(true_taxid, at_rank="species")
     called_species = taxtree.parent(called_taxid, at_rank="species")
@@ -176,6 +176,7 @@ def main():
                     "genus_classification",
                     "species_classification",
                     "mtb_classification",
+                    "mtbc_classification",
                 ]
             ),
             file=fd_out,
@@ -206,6 +207,7 @@ def main():
                     genus_clf = NA
                     species_clf = NA
                     mtb_clf = NA
+                    mtbc_clf = NA
                 elif not is_mycobacterium(truth_taxid, taxtree):
                     if is_mycobacterium(called_taxid, taxtree):
                         genus_clf = FP
@@ -214,10 +216,15 @@ def main():
                             mtb_clf = FP
                         else:
                             mtb_clf = TN
+                        if is_mtbc(called_taxid, taxtree):
+                            mtbc_clf = FP
+                        else:
+                            mtbc_clf = TN
                     else:
                         genus_clf = TN
                         species_clf = TN
                         mtb_clf = TN
+                        mtbc_clf = TN
                 else:  # truth is mycobacterium
                     if not is_mycobacterium(called_taxid, taxtree):
                         genus_clf = FN
@@ -226,6 +233,10 @@ def main():
                             mtb_clf = FN
                         else:
                             mtb_clf = NA
+                        if is_mtbc(truth_taxid, taxtree):
+                            mtbc_clf = FN
+                        else:
+                            mtbc_clf = NA
                     else:
                         if is_genus_correct(truth_taxid, called_taxid, taxtree):
                             genus_clf = TP
@@ -240,6 +251,11 @@ def main():
                                 mtb_clf = TP
                             else:
                                 mtb_clf = FN
+                        if is_mtbc(truth_taxid, taxtree):
+                            if is_mtbc(called_taxid, taxtree):
+                                mtbc_clf = TP
+                            else:
+                                mtbc_clf = FN
 
                 if is_illumina:
                     print(
@@ -252,7 +268,9 @@ def main():
                     )
                 else:
                     print(
-                        DELIM.join([read_id, genus_clf, species_clf, mtb_clf]),
+                        DELIM.join(
+                            [read_id, genus_clf, species_clf, mtb_clf, mtbc_clf]
+                        ),
                         file=fd_out,
                     )
 
