@@ -1,12 +1,14 @@
 import sys
 from dataclasses import dataclass
-from typing import Optional
+from functools import cache
+from typing import Optional, List
 
 sys.stderr = open(snakemake.log[0], "w")
 
 from pathlib import Path
 import csv
 from taxonomy import Taxonomy, TaxonomyError
+from Bio import Entrez
 
 DELIM = "\t"
 FN = "FN"
@@ -36,10 +38,41 @@ MYCO_TAXIDS = {
 }
 
 
+@dataclass
+class TaxonomyNode:
+    id: str
+    name: str
+    parent: Optional["TaxonomyNode"]
+    rank: str
+
+
+@cache
+def fetch_taxonomy(taxid: str) -> List[TaxonomyNode]:
+    handle = Entrez.efetch(db="taxonomy", id=taxid)
+    record = Entrez.read(handle)[0]
+    lineage = []
+    prev_node = None
+    for lineage_info in record["LineageEx"]:
+        _id = lineage_info["TaxId"]
+        name = lineage_info["ScientificName"]
+        rank = lineage_info["Rank"]
+        parent = prev_node
+        node = TaxonomyNode(id=_id, name=name, rank=rank, parent=parent)
+        lineage.append(node)
+        prev_node = node
+
+    return lineage
+
+
 def is_mtbc(taxid: str, taxtree) -> bool:
     if taxid == UNCLASSIFIED:
         return False
-    lineage = taxtree.lineage(taxid)
+
+    try:
+        lineage = taxtree.lineage(taxid)
+    except TaxonomyError:
+        lineage = fetch_taxonomy(taxid)
+
     for node in lineage:
         if node.id == MTBC_TAXID:
             return True
@@ -50,7 +83,12 @@ def is_mtbc(taxid: str, taxtree) -> bool:
 def is_mtb(taxid: str, taxtree) -> bool:
     if taxid == UNCLASSIFIED:
         return False
-    lineage = taxtree.lineage(taxid)
+
+    try:
+        lineage = taxtree.lineage(taxid)
+    except TaxonomyError:
+        lineage = fetch_taxonomy(taxid)
+
     for node in lineage:
         if node.id == MTB_TAXID:
             return True
@@ -62,7 +100,11 @@ def is_mycobacterium(taxid: str, taxtree: Taxonomy) -> bool:
     if taxid == UNCLASSIFIED:
         return False
 
-    lineage = taxtree.lineage(taxid)
+    try:
+        lineage = taxtree.lineage(taxid)
+    except TaxonomyError:
+        lineage = fetch_taxonomy(taxid)
+
     for node in lineage:
         if node.id in MYCO_TAXIDS:
             return True
