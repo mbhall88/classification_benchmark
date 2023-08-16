@@ -403,12 +403,12 @@ rule download_GTDB_mycobacterium:
     resources:
         runtime="2h",
         mem_mb=int(4 * GB),
-    threads: 8
+    threads: 32
     conda:
         ENVS / "genome_updater.yaml"
     params:
-        opts='-A 0 -m -a -M "gtdb" -f "genomic.fna.gz" -g "bacteria" -d "refseq,genbank"',
-        taxon='-T "g__Mycobacterium"',
+        opts='-A "species:1" -m -a -M "gtdb" -f "genomic.fna.gz" -g "bacteria" -d "refseq"',
+        taxon='-T "g__Mycobacterium,c__Gammaproteobacteria,c__Bacilli"',
         outdir=lambda wildcards, output: Path(output.genomes).parent.parent,
         version=lambda wildcards, output: Path(output.genomes).parts[-2],
     shell:
@@ -457,8 +457,8 @@ rule build_mycobacterium_kraken_db:
         LOGS / "build_mycobacterium_kraken_db.log",
     resources:
         runtime="1d",
-        mem_mb=int(16 * GB),
-    threads: 8
+        mem_mb=int(32 * GB),
+    threads: 16
     container:
         CONTAINERS["kraken"]
     params:
