@@ -392,12 +392,12 @@ rule build_human_pangenome_kraken_db:
 rule download_GTDB_mycobacterium:
     output:
         genomes=temp(
-            directory(RESULTS / "db/GTDB_genus_Mycobacterium/2023-08-03/files")
+            directory(RESULTS / "db/GTDB_genus_Mycobacterium/genomes/files")
         ),
         asm_summary=RESULTS
-        / "db/GTDB_genus_Mycobacterium/2023-08-03/assembly_summary.txt",
+        / "db/GTDB_genus_Mycobacterium/genomes/assembly_summary.txt",
         taxonomy=RESULTS
-        / "db/GTDB_genus_Mycobacterium/2023-08-03/bac120_taxonomy.tsv.gz",
+        / "db/GTDB_genus_Mycobacterium/genomes/bac120_taxonomy.tsv.gz",
     log:
         LOGS / "download_GTDB_mycobacterium.log",
     resources:
