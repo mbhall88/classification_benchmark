@@ -128,7 +128,14 @@ def main():
 
     with open(snakemake.output.classification, "w") as fd_out:
         print(
-            f"read_id{DELIM}genus_classification{DELIM}species_classification",
+            DELIM.join(
+                [
+                    "read_id",
+                    "genus_classification",
+                    "species_classification",
+                    "mtb_classification",
+                ]
+            ),
             file=fd_out,
         )
         seen = set()
@@ -156,17 +163,27 @@ def main():
                 if not truth_taxid and snakemake.params.ignore_unmapped:
                     genus_clf = NA
                     species_clf = NA
+                    mtb_clf = NA
                 elif not is_mycobacterium(truth_taxid, taxtree):
                     if is_mycobacterium(called_taxid, taxtree):
                         genus_clf = FP
                         species_clf = FP
+                        if is_mtb(called_taxid, taxtree):
+                            mtb_clf = FP
+                        else:
+                            mtb_clf = TN
                     else:
                         genus_clf = TN
                         species_clf = TN
-                else:
+                        mtb_clf = TN
+                else:  # truth is mycobacterium
                     if not is_mycobacterium(called_taxid, taxtree):
                         genus_clf = FN
                         species_clf = FN
+                        if is_mtb(truth_taxid, taxtree):
+                            mtb_clf = FN
+                        else:
+                            mtb_clf = TN
                     else:
                         if is_genus_correct(truth_taxid, called_taxid, taxtree):
                             genus_clf = TP
@@ -176,19 +193,25 @@ def main():
                             species_clf = TP
                         else:
                             species_clf = FN
+                        if is_mtb(truth_taxid, taxtree):
+                            if is_mtb(called_taxid, taxtree):
+                                mtb_clf = TP
+                            else:
+                                mtb_clf = FN
 
                 if is_illumina:
                     print(
-                        f"{read_id}/1{DELIM}{genus_clf}{DELIM}{species_clf}",
+                        DELIM.join([f"{read_id}/1", genus_clf, species_clf, mtb_clf]),
                         file=fd_out,
                     )
                     print(
-                        f"{read_id}/2{DELIM}{genus_clf}{DELIM}{species_clf}",
+                        DELIM.join([f"{read_id}/2", genus_clf, species_clf, mtb_clf]),
                         file=fd_out,
                     )
                 else:
                     print(
-                        f"{read_id}{DELIM}{genus_clf}{DELIM}{species_clf}", file=fd_out
+                        DELIM.join([read_id, genus_clf, species_clf, mtb_clf]),
+                        file=fd_out,
                     )
 
 

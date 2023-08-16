@@ -37,12 +37,11 @@ for lib in kraken_libs:
 for tech in ["illumina", "ont"]:
     target_files.add(RESULTS / f"dehumanise/summary.{tech}.csv")
 
-target_files.add(RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/hash.k2d")
 
 
 for tech in ["ont", "illumina"]:
     for db in ["standard", "standard-8", "mycobacterium"]:
-        target_files.add(RESULTS / f"classify/kraken/{db}.{tech}.k2")
+        target_files.add(RESULTS / f"classify/classifications.kraken.{db}.{tech}.tsv")
     for db in ["clockwork", "mtbc", "mycobacterium"]:
         target_files.add(RESULTS / f"classify/minimap2/aln.{db}.{tech}.paf")
 
