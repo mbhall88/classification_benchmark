@@ -225,7 +225,7 @@ def main():
                         if is_mtb(truth_taxid, taxtree):
                             mtb_clf = FN
                         else:
-                            mtb_clf = TN
+                            mtb_clf = NA
                     else:
                         if is_genus_correct(truth_taxid, called_taxid, taxtree):
                             genus_clf = TP
