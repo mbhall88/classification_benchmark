@@ -446,11 +446,34 @@ rule prepare_mycobacterium_for_kraken:
         "python {input.script} -x {params.exclude} {params.opts} -o {output.fasta} -s {input.summary} {input.genomes} 2> {log}"
 
 
+rule download_and_add_mycobacterial_taxonomy:
+    input:
+        names=rules.download_kraken_taxonomy.output.names,
+        genomes=rules.prepare_mycobacterium_for_kraken.output.fasta
+    output:
+        library=directory(RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/library"),
+        taxonomy=directory(RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/taxonomy"),
+    resources:
+        mem_mb=int(8 * GB),
+        runtime="4h",
+    container:
+        CONTAINERS["kraken"]
+    log:
+        LOGS / "download_and_add_mycobacterial_taxonomy.log",
+    shell:
+        """
+        exec &> {log}
+        mkdir -p {output.taxonomy}
+        cp $(dirname {input.names})/*.dmp {output.taxonomy}
+        kraken2-build --add-to-library {input.genomes} --db $(dirname {output.library})
+        """
+
+
 rule build_mycobacterium_kraken_db:
     input:
-        fasta=rules.prepare_mycobacterium_for_kraken.output.fasta,
+        lib=rules.download_and_add_mycobacterial_taxonomy.output.library
     output:
-        db=RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/",
+        db=directory(RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/"),
     log:
         LOGS / "build_mycobacterium_kraken_db.log",
     resources:
@@ -462,16 +485,6 @@ rule build_mycobacterium_kraken_db:
     shell:
         """
         exec &> {log}
-        # remove annoying perl warnings
-        export LANGUAGE=en_US.UTF-8
-        export LC_ALL=en_US.UTF-8
-        export LANG=en_US.UTF-8
-        export LC_CTYPE=en_US.UTF-8
-        >&2 echo "Downloading taxonomy..."
-        kraken2-build --download-taxonomy --db {output.db}
-        >&2 echo "Adding to library..."
-        kraken2-build --add-to-library {input.fasta} --db {output.db}
-        >&2 echo "Building..."
         kraken2-build --build --db {output.db} --threads {threads}
         #>&2 echo "Cleaning..."
         #k2 clean --db {output.db}
