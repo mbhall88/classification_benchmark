@@ -534,7 +534,7 @@ rule create_minimap2_mycobacterium_db:
         tmpd=$(mktemp -d)
         version="version"
         genome_updater.sh {params.opts} -t {threads} -o $tmpd -b "$version"
-        (find $tmpd -type f -name '*.fna.gz' -print0 | xargs cat) >> {output.db}
+        (find $tmpd -type f -name '*.fna.gz' -print0 | xargs -0 cat) >> {output.db}
         """
 
 

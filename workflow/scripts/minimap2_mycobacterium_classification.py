@@ -9,9 +9,10 @@ from pathlib import Path
 import csv
 from taxonomy import Taxonomy, TaxonomyError
 from Bio import Entrez
+from pafpy import PafFile
 
 
-Entrez.email = 'michael.hall2@unimelb.edu.au'
+Entrez.email = "michael.hall2@unimelb.edu.au"
 DELIM = "\t"
 FN = "FN"
 TN = "TN"
@@ -163,6 +164,12 @@ def main():
     taxdir = str(Path(snakemake.input.nodes).parent)
     taxtree = Taxonomy.from_ncbi(taxdir)
 
+    acc2taxid = dict()
+    with open(snakemake.input.acc_truth) as fd:
+        reader = csv.DictReader(fd, delimiter="\t")
+        for row in reader:
+            acc2taxid[row["accession"]] = {c: row[c] for c in COLUMNS}
+
     truth = dict()
     is_illumina = snakemake.wildcards.tech == "illumina"
     with open(snakemake.input.truth, newline="") as fd:
@@ -183,15 +190,17 @@ def main():
             ),
             file=fd_out,
         )
-        seen = set()
-        with open(snakemake.input.classification) as fd_in:
-            for line in map(str.rstrip, fd_in):
-                fields = line.split("\t")
-                read_id = fields[1]
-                if read_id in seen:
-                    raise ValueError(f"Seen {read_id} multiple times")
-                else:
-                    seen.add(read_id)
+
+        clfs = dict()
+
+        with PafFile(snakemake.input.aln) as paf:
+            for record in paf:
+                if not record.is_primary():
+                    continue
+
+                read_id = record.qname
+                if is_illumina:
+                    read_id = read_id[:-2]
 
                 if is_illumina:
                     read_tax = truth.get(f"{read_id}/1")
@@ -203,7 +212,7 @@ def main():
                     raise KeyError(f"{read_id} not in truth")
 
                 truth_taxid = read_tax["species_id"]
-                called_taxid = fields[2]
+                called_taxid = acc2taxid.get(record.tname, "0")
 
                 if not truth_taxid and snakemake.params.ignore_unmapped:
                     genus_clf = NA
@@ -259,23 +268,41 @@ def main():
                             else:
                                 mtbc_clf = FN
 
-                row = [genus_clf, species_clf, mtb_clf, mtbc_clf]
-                if is_illumina:
-                    print(
-                        DELIM.join([f"{read_id}/1", *row]),
-                        file=fd_out,
-                    )
-                    print(
-                        DELIM.join([f"{read_id}/2", *row]),
-                        file=fd_out,
-                    )
+                current_clfs = clfs.get(read_id)
+                new_clfs = [genus_clf, species_clf, mtb_clf, mtbc_clf]
+                if current_clfs is None:
+                    clfs[read_id] = new_clfs
                 else:
-                    print(
-                        DELIM.join(
-                            [read_id, *row]
-                        ),
-                        file=fd_out,
-                    )
+                    updated_clfs = []
+                    for current_c, new_c in zip(current_clfs, new_clfs):
+                        if current_c == new_c:
+                            updated_clfs.append(current_c)
+                        elif TP in (current_c, new_c):
+                            updated_clfs.append(TP)
+                        elif FP in (current_c, new_c):
+                            updated_clfs.append(FP)
+                        else:
+                            raise NotImplementedError(
+                                f"Got an unexpected classification comparison. The current is {current_c} and the new is {new_c}. QNAME {record.qname} TNAME {record.tname}"
+                            )
+                    assert len(updated_clfs) == len(new_clfs), record
+                    clfs[read_id] = updated_clfs
+
+        for read_id, entires in clfs.items():
+            if is_illumina:
+                print(
+                    DELIM.join([f"{read_id}/1", *entires]),
+                    file=fd_out,
+                )
+                print(
+                    DELIM.join([f"{read_id}/2", *entires]),
+                    file=fd_out,
+                )
+            else:
+                print(
+                    DELIM.join([read_id, *entires]),
+                    file=fd_out,
+                )
 
 
 main()

@@ -43,7 +43,7 @@ for tech in ["ont", "illumina"]:
     for db in ["standard", "standard-8", "mycobacterium"]:
         target_files.add(RESULTS / f"classify/classifications.kraken.{db}.{tech}.tsv")
     for db in ["clockwork", "mtbc", "mycobacterium"]:
-        target_files.add(RESULTS / f"classify/minimap2/aln.{db}.{tech}.paf")
+        target_files.add(RESULTS / f"classify/classifications.minimap2.{db}.{tech}.tsv")
 
 
 localrules:

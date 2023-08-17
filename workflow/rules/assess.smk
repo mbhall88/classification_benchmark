@@ -258,3 +258,43 @@ rule kraken_mycobacterium_classification:
         ignore_unmapped=True,
     script:
         SCRIPTS / "kraken_mycobacterium_classification.py"
+
+
+rule minimap2_acc2taxid:
+    input:
+        metadata=rules.combine_references.output.metadata,
+        names=rules.download_kraken_taxonomy.output.names,
+        nodes=rules.download_kraken_taxonomy.output.nodes,
+        fasta=rules.create_minimap2_mycobacterium_db.output.db,
+    output:
+        truth=RESULTS / "assess/minimap2.db.acc2tax.tsv",
+    log:
+        LOGS / "minimap2_acc2taxid.log",
+    resources:
+        runtime="1d",
+    conda:
+        ENVS / "accession2taxonomy.yaml"
+    script:
+        SCRIPTS / "minimap2_acc2taxid.py"
+
+
+rule minimap2_mycobacterium_classification:
+    input:
+        truth=RESULTS / "assess/read2taxonomy.{tech}.tsv",
+        aln=rules.minimap2_classify.output.aln,
+        names=rules.download_kraken_taxonomy.output.names,
+        nodes=rules.download_kraken_taxonomy.output.nodes,
+        acc_truth=rules.minimap2_acc2taxid.output.truth,
+    output:
+        classification=RESULTS / "classify/classifications.minimap2.{db}.{tech}.tsv",
+    log:
+        LOGS / "minimap2_mycobacterium_classification/{db}/{tech}.log",
+    resources:
+        runtime="15m",
+        mem_mb=int(2 * GB),
+    conda:
+        ENVS / "minimap2_mycobacterium_classification.yaml"
+    params:
+        ignore_unmapped=True,
+    script:
+        SCRIPTS / "minimap2_mycobacterium_classification.py"
