@@ -68,7 +68,7 @@ def main():
     taxtree = Taxonomy.from_ncbi(taxdir)
 
     with open(snakemake.input.metadata) as fd_in, open(
-        snakemake.output.metadata, "w"
+        snakemake.output.truth, "w"
     ) as fd_out:
         print(
             DELIM.join(
