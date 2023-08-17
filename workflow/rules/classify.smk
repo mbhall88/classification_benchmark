@@ -104,7 +104,7 @@ rule minimap2_classify:
 CLASSIFY_DBS = {
     "standard": RESULTS / "db/kraken/standard",
     "standard-8": RESULTS / "db/kraken/standard-8",
-    "mycobacterium": RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/",
+    "mycobacterium": RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/hash.k2d",
 }
 
 
@@ -128,10 +128,11 @@ rule kraken_classify:
     benchmark:
         repeat(BENCH / "classify/kraken/{db}/{tech}.tsv", 1)
     params:
+        db=lambda wildcards, input: Path(input.db).parent if wildcards.db == "mycobacterium" else input.db,
         opts="--minimum-hit-groups 3 --report-minimizer-data",
         tech_opts=lambda wildcards: "--paired" if wildcards.tech == "illumina" else "",
     shell:
         """
-        kraken2 {params.opts} {params.tech_opts} --threads {threads} --db {input.db} \
+        kraken2 {params.opts} {params.tech_opts} --threads {threads} --db {params.db} \
             --report {output.report} --output {output.out} {input.reads} 2> {log}
         """

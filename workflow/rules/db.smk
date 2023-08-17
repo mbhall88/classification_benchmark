@@ -473,7 +473,7 @@ rule build_mycobacterium_kraken_db:
     input:
         lib=rules.download_and_add_mycobacterial_taxonomy.output.library
     output:
-        db=directory(RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/"),
+        hash=RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/hash.k2d",
     log:
         LOGS / "build_mycobacterium_kraken_db.log",
     resources:
@@ -485,9 +485,9 @@ rule build_mycobacterium_kraken_db:
     shell:
         """
         exec &> {log}
-        kraken2-build --build --db {output.db} --threads {threads}
+        kraken2-build --build --db $(dirname {output.hash}) --threads {threads}
         #>&2 echo "Cleaning..."
-        #k2 clean --db {output.db}
+        #k2 clean --db $(dirname {output.hash})
         """
 
 
