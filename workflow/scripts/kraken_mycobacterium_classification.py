@@ -10,6 +10,8 @@ import csv
 from taxonomy import Taxonomy, TaxonomyError
 from Bio import Entrez
 
+
+Entrez.email = 'michael.hall2@unimelb.edu.au'
 DELIM = "\t"
 FN = "FN"
 TN = "TN"
