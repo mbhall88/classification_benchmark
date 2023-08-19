@@ -11,6 +11,7 @@ sys.stderr = open(snakemake.log[0], "w")
 from pathlib import Path
 from taxonomy import Taxonomy, TaxonomyError
 from Bio import Entrez
+from subprocess import run
 
 
 Entrez.email = "michael.hall2@unimelb.edu.au"
@@ -24,6 +25,7 @@ COLUMNS = [
     "genus_id",
     "genus",
 ]
+TAXID_REGEX = re.compile(r"<TaxId>(?P<taxid>\d+)</TaxId>")
 
 
 @dataclass
@@ -34,15 +36,20 @@ class TaxonomyNode:
     rank: str
 
 
-@cache
 def accession2taxid(acc: str) -> str:
-    handle = Entrez.esearch(db="nucleotide", term=acc)
-    record = Entrez.read(handle)
-    gi = record["IdList"][0]
-    handle = Entrez.esummary(db="nucleotide", id=gi, retmode="json")
-    result = json.load(handle)["result"]
-    taxid = result[gi]["taxid"]
-    return str(taxid)
+    result = run(
+        f"esearch -db nucleotide -query {acc} | esummary",
+        capture_output=True,
+        shell=True,
+        text=True,
+    )
+    output = result.stdout
+    match = TAXID_REGEX.search(output)
+    if not match:
+        raise ValueError(
+            f"Couldn't get taxid for {acc}\n{result.stdout}\n{result.stderr}"
+        )
+    return match.group("taxid")
 
 
 @cache

@@ -273,7 +273,7 @@ rule minimap2_acc2taxid:
     resources:
         runtime="1d",
     conda:
-        ENVS / "accession2taxonomy.yaml"
+        ENVS / "minimap2_acc2taxid.yaml"
     script:
         SCRIPTS / "minimap2_acc2taxid.py"
 
