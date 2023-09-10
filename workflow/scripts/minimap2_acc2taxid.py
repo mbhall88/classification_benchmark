@@ -137,7 +137,7 @@ def main():
                     taxid = MTB_TAXID
                 else:
                     try:
-                        taxid = accession2taxid(acc)
+                        taxid = accession2taxid(identifier)
                     except Exception as err:
                         print(f"Failed to get taxid for {identifier}", file=sys.stderr)
                         raise err
