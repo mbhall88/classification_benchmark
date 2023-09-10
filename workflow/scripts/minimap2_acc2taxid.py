@@ -90,6 +90,7 @@ def main():
                 ]
             ),
             file=fd_out,
+            flush=True
         )
 
         for row in map(str.rstrip, fd_in):
@@ -125,7 +126,7 @@ def main():
                     row[5] = l.id
                     row[6] = l.name
 
-            print(DELIM.join(row), file=fd_out)
+            print(DELIM.join(row), file=fd_out, flush=True)
 
         with gzip.open(snakemake.input.fasta, mode="rt") as fasta_fd:
             for line in fasta_fd:
@@ -160,7 +161,7 @@ def main():
                         row[5] = l.id
                         row[6] = l.name
 
-                print(DELIM.join(row), file=fd_out)
+                print(DELIM.join(row), file=fd_out, flush=True)
 
 
 main()

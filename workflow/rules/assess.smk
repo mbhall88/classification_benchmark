@@ -271,7 +271,7 @@ rule minimap2_acc2taxid:
     log:
         LOGS / "minimap2_acc2taxid.log",
     resources:
-        runtime="1d",
+        runtime="1w",
     conda:
         ENVS / "minimap2_acc2taxid.yaml"
     script:
