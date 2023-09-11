@@ -74,6 +74,13 @@ def main():
     taxdir = str(Path(snakemake.input.nodes).parent)
     taxtree = Taxonomy.from_ncbi(taxdir)
 
+    with open(snakemake.input.acc2taxid) as fp_in:
+        acc2tax = dict()
+        for line in map(str.rstrip, fp_in):
+            acc, taxid = line.split(",")
+            assert acc not in acc2tax, line
+            acc2tax[acc] = taxid
+
     with open(snakemake.input.metadata) as fd_in, open(
         snakemake.output.truth, "w"
     ) as fd_out:
@@ -90,7 +97,7 @@ def main():
                 ]
             ),
             file=fd_out,
-            flush=True
+            flush=True,
         )
 
         for row in map(str.rstrip, fd_in):
@@ -102,11 +109,13 @@ def main():
             else:
                 acc = identifier
 
-            try:
-                taxid = accession2taxid(acc)
-            except Exception as err:
-                print(f"Failed to get taxid for {identifier}", file=sys.stderr)
-                continue
+            taxid = acc2tax.get(acc)
+            if taxid is None:
+                try:
+                    taxid = accession2taxid(acc)
+                except Exception as err:
+                    print(f"Failed to get taxid for {identifier}", file=sys.stderr)
+                    continue
 
             row = [identifier, "", "", "", "", "", ""]
 
@@ -137,11 +146,15 @@ def main():
                 if m:
                     taxid = MTB_TAXID
                 else:
-                    try:
-                        taxid = accession2taxid(identifier)
-                    except Exception as err:
-                        print(f"Failed to get taxid for {identifier}", file=sys.stderr)
-                        raise err
+                    taxid = acc2tax.get(identifier)
+                    if taxid is None:
+                        try:
+                            taxid = accession2taxid(identifier)
+                        except Exception as err:
+                            print(
+                                f"Failed to get taxid for {identifier}", file=sys.stderr
+                            )
+                            raise err
 
                 row = [identifier, "", "", "", "", "", ""]
 

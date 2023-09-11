@@ -266,6 +266,7 @@ rule minimap2_acc2taxid:
         names=rules.download_kraken_taxonomy.output.names,
         nodes=rules.download_kraken_taxonomy.output.nodes,
         fasta=rules.create_minimap2_mycobacterium_db.output.db,
+        acc2taxid=CONFIG / "acc2taxid.csv"
     output:
         truth=RESULTS / "assess/minimap2.db.acc2tax.tsv",
     log:
