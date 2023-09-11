@@ -60,14 +60,100 @@ def infer_classify_reads(wildcards):
         raise ValueError(f"Don't recognise tech {wildcards.tech}")
 
 
+rule remove_held_out_assemblies_clockwork:
+    input:
+        db=rules.faidx_db.output.fasta,
+        ntm=rules.split_mycobacteria.output.ntm_fasta,
+        mtb=rules.split_mycobacteria.output.mtbc_fasta,
+    output:
+        db=RESULTS / "classify/minimap2/db/db.fa.gz",
+    log:
+        LOGS / "remove_held_out_assemblies_clockwork.log",
+    resources:
+        mem_mb=int(4 * GB),
+        runtime="10m",
+    container:
+        CONTAINERS["seqkit"]
+    shell:
+        """
+        exec 2> {log}
+        rmids=$(mktemp -u)
+        seqkit seq -n -i {input.mtb} > $rmids
+        seqkit seq -n -i {input.ntm} >> $rmids
+        seqkit grep -v -f $rmids -o {output.db} {input.db}
+        """
+
+
+rule index_heldout_clockwork_with_minimap2:
+    input:
+        fasta=rules.remove_held_out_assemblies_clockwork.output.db,
+    output:
+        index=RESULTS / "classify/minimap2/db/db.{preset}.mmi",
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * int(32 * GB),
+        runtime="5m",
+    log:
+        LOGS / "index_heldout_clockwork_with_minimap2/{preset}.log",
+    threads: 4
+    container:
+        CONTAINERS["minimap2"]
+    params:
+        opts="-x {preset} -I 12G",
+    shell:
+        "minimap2 {params.opts} -t {threads} -d {output.index} {input.fasta} 2> {log}"
+
+
+rule remove_held_out_assemblies_mycobacterium:
+    input:
+        db=rules.create_minimap2_mycobacterium_db.output.db,
+        ntm=rules.split_mycobacteria.output.ntm_fasta,
+        mtb=rules.split_mycobacteria.output.mtbc_fasta,
+    output:
+        db=RESULTS / "classify/minimap2/db/Mycobacterium.rep.fa.gz",
+    log:
+        LOGS / "remove_held_out_assemblies_mycobacterium.log",
+    resources:
+        mem_mb=int(4 * GB),
+        runtime="10m",
+    container:
+        CONTAINERS["seqkit"]
+    shell:
+        """
+        exec 2> {log}
+        rmids=$(mktemp -u)
+        seqkit seq -n -i {input.mtb} > $rmids
+        seqkit seq -n -i {input.ntm} >> $rmids
+        seqkit grep -v -f $rmids -o {output.db} {input.db}
+        """
+
+
+rule index_heldout_mycobacterium_db_minimap2:
+    input:
+        fasta=rules.remove_held_out_assemblies_mycobacterium.output.db,
+    output:
+        index=RESULTS / "classify/minimap2/db/Mycobacterium.rep.{preset}.mmi",
+    resources:
+        mem_mb=lambda wildcards, attempt: attempt * int(16 * GB),
+        runtime="5m",
+    log:
+        LOGS / "index_heldout_mycobacterium_db_minimap2/{preset}.log",
+    threads: 4
+    container:
+        CONTAINERS["minimap2"]
+    params:
+        opts="-x {preset} -I 12G",
+    shell:
+        "minimap2 {params.opts} -t {threads} -d {output.index} {input.fasta} 2> {log}"
+
+
 def infer_minimap2_db(wildcards):
     preset = PRESETS[wildcards.tech]
     if wildcards.db == "clockwork":
-        return RESULTS / f"db/minimap2/db.{preset}.mmi"
+        return RESULTS / f"classify/minimap2/db/db.{preset}.mmi"
     elif wildcards.db == "mtbc":
         return RESULTS / f"db/GTDB_genus_Mycobacterium/MTB.{preset}.mmi"
     elif wildcards.db == "mycobacterium":
-        return RESULTS / f"db/GTDB_genus_Mycobacterium/Mycobacterium.rep.{preset}.mmi"
+        return RESULTS / f"classify/minimap2/db/Mycobacterium.rep.{preset}.mmi"
     else:
         raise ValueError(f"Don't recognise db {wildcards.db}")
 
@@ -128,7 +214,9 @@ rule kraken_classify:
     benchmark:
         repeat(BENCH / "classify/kraken/{db}/{tech}.tsv", 1)
     params:
-        db=lambda wildcards, input: Path(input.db).parent if wildcards.db == "mycobacterium" else input.db,
+        db=lambda wildcards, input: Path(input.db).parent
+        if wildcards.db == "mycobacterium"
+        else input.db,
         opts="--minimum-hit-groups 3 --report-minimizer-data",
         tech_opts=lambda wildcards: "--paired" if wildcards.tech == "illumina" else "",
     shell:
