@@ -266,7 +266,7 @@ rule minimap2_acc2taxid:
         names=rules.download_kraken_taxonomy.output.names,
         nodes=rules.download_kraken_taxonomy.output.nodes,
         fasta=rules.create_minimap2_mycobacterium_db.output.db,
-        acc2taxid=CONFIG / "acc2taxid.csv"
+        acc2taxid=CONFIG / "acc2taxid.csv",
     output:
         truth=RESULTS / "assess/minimap2.db.acc2tax.tsv",
     log:
@@ -299,3 +299,44 @@ rule minimap2_mycobacterium_classification:
         ignore_unmapped=True,
     script:
         SCRIPTS / "minimap2_mycobacterium_classification.py"
+
+
+def infer_classify_benchmarks(wildcards):
+    benchmarks = []
+    tech = wildcards.tech
+    for db in ["standard", "standard-8", "mycobacterium"]:
+        benchmarks.append(BENCH / f"classify/kraken/{db}/{tech}.tsv")
+    for db in ["clockwork", "mtbc", "mycobacterium"]:
+        benchmarks.append(BENCH / f"classify/minimap2/{db}/{tech}.tsv")
+
+    return benchmarks
+
+
+def infer_classify_classifications(wildcards):
+    clfs = []
+    tech = wildcards.tech
+    for db in ["standard", "standard-8", "mycobacterium"]:
+        clfs.append(RESULTS / f"classify/classifications.kraken.{db}.{tech}.tsv")
+    for db in ["clockwork", "mtbc", "mycobacterium"]:
+        clfs.append(RESULTS / f"classify/classifications.minimap2.{db}.{tech}.tsv")
+
+    return clfs
+
+
+rule classify_summary_statistics:
+    input:
+        classifications=infer_classify_classifications,
+        benchmarks=infer_classify_benchmarks,
+    output:
+        genus_summary=RESULTS / "classify/summary.genus.{tech}.csv",
+        species_summary=RESULTS / "classify/summary.species.{tech}.csv",
+        mtb_summary=RESULTS / "classify/summary.mtb.{tech}.csv",
+        mtbc_summary=RESULTS / "classify/summary.mtbc.{tech}.csv",
+    log:
+        LOGS / "classify_summary_statistics/{tech}.log",
+    resources:
+        runtime="5m",
+    conda:
+        ENVS / "datasci.yaml"
+    script:
+        SCRIPTS / "classify_summary_statistics.py"
