@@ -154,7 +154,7 @@ def main():
                             print(
                                 f"Failed to get taxid for {identifier}", file=sys.stderr
                             )
-                            raise err
+                            continue
 
                 row = [identifier, "", "", "", "", "", ""]
 
