@@ -164,33 +164,6 @@ rule build_decontamination_db:
         "perl {params.script} {params.outdir} &> {log}"
 
 
-rule download_ancestral_genome:
-    output:
-        asm=RESULTS / "db/mtb_ancestor.fa.gz",
-    log:
-        LOGS / "download_ancestral_genome.log",
-    resources:
-        mem_mb=int(0.5 * GB),
-        runtime="3m",
-    params:
-        url=config["ancestral_genome"]["url"],
-        md5=config["ancestral_genome"]["md5"],
-    container:
-        CONTAINERS["base"]
-    shadow:
-        "shallow"
-    shell:
-        """
-        wget -O asm.fa {params.url} 2> {log}
-        hash=$(md5sum asm.fa | cut -d' ' -f1)
-        if [ "$hash" != {params.md5} ]; then
-          echo "MD5 does not match" >> {log}
-          exit 1
-        fi
-        gzip -c asm.fa > {output.asm} 2>> {log} 
-        """
-
-
 rule download_mtb_lineage_refs:
     output:
         asms=expand(str(RESULTS / "db/{sample}.fasta.gz"), sample=GRAMTOOLS_SAMPLES),
@@ -230,7 +203,6 @@ rule combine_references:
     input:
         decontam_fa=rules.build_decontamination_db.output.fasta,
         decontam_metadata=rules.build_decontamination_db.output.metadata,
-        ancestral=rules.download_ancestral_genome.output.asm,
         gramtools_asms=rules.download_mtb_lineage_refs.output.asms,
     output:
         fasta=RESULTS / "db/db.fa",
