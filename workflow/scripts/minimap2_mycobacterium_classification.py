@@ -212,7 +212,7 @@ def main():
                     raise KeyError(f"{read_id} not in truth")
 
                 truth_taxid = read_tax["species_id"]
-                called_taxid = acc2taxid.get(record.tname, "0")
+                called_taxid = acc2taxid.get(record.tname, {}).get("species_id", "0")
 
                 if not truth_taxid and snakemake.params.ignore_unmapped:
                     genus_clf = NA
