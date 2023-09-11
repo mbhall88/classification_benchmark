@@ -26,6 +26,7 @@ containers:
   genome_updater: "docker://quay.io/biocontainers/genome_updater:0.6.3--hdfd78af_0"
   mashtree: "docker://quay.io/biocontainers/mashtree:1.2.0--pl5321h031d066_2"
   drep: "docker://quay.io/biocontainers/drep:3.4.3--pyhdfd78af_0"
+  seqkit: "docker://quay.io/biocontainers/seqkit:2.5.1--h9ee0642_0"
 
 ancestral_genome:
   url: "https://zenodo.org/record/3497110/files/MTB_ancestor_reference.fasta"
