@@ -139,7 +139,7 @@ seqkit grep -f keep.ids -o reads_2.enriched.fq reads_2.depleted.fq
 **kraken2**
 
 We'll use
-the [`extract_kraken_reads.py` scripts](https://github.com/jenniferlu717/KrakenTools#extract_kraken_readspy)
+the [`extract_kraken_reads.py` script](https://github.com/jenniferlu717/KrakenTools#extract_kraken_readspy)
 for this
 
 ```
