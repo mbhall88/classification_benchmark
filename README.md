@@ -1,6 +1,4 @@
-# Contamination removal and classification of *Mycobacterium
-
-tuberculosis* metagenomic samples
+# Contamination removal and classification of *Mycobacterium tuberculosis* metagenomic samples
 
 Benchmarking different ways of doing read (taxonomic) classification, with a focus on
 removal of contamination and classification of _M. tuberculosis_ reads.
