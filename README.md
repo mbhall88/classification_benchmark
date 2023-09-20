@@ -1,10 +1,12 @@
-# Contamination removal and classification of *Mycobacterium tuberculosis* metagenomic samples
+# Pangenome databases provide superior host removal and mycobacteria classification from clinical metagenomic data
+
+> Hall, M, Coin, L., Pangenome databases provide superior host removal and mycobacteria classification from clinical metagenomic data. bioRxiv 2023. doi: [10.1101/2023.09.18.558339][doi]
 
 Benchmarking different ways of doing read (taxonomic) classification, with a focus on
 removal of contamination and classification of _M. tuberculosis_ reads.
 
 This repository contains the code and snakemake pipeline to build/download the
-databases, obtain all results from the paper, along with accompanying configuration
+databases, obtain all results from [the paper][doi], along with accompanying configuration
 files.
 
 Custom databases have all been uploaded to Zenodo, along with the simulated reads:
@@ -148,3 +150,5 @@ python extract_kraken_reads.py -k classifications.myco.tsv -1 reads.depleted.fq 
 # illumina
 python extract_kraken_reads.py -k classifications.myco.tsv -1 reads_1.depleted.fq -2 reads_2.depleted.fq -o reads_1.enriched.fq -o2 reads_2.enriched.fq -t 1773 -r myco.kreport --include-children
 ```
+
+[doi]: https://doi.org/10.1101/2023.09.18.558339 
