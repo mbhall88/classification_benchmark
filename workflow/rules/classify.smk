@@ -50,12 +50,17 @@ rule extract_dehumanised_illumina_reads:
 
 def infer_classify_reads(wildcards):
     if wildcards.tech == "ont":
-        return RESULTS / "dehumanise/metagenome.dehumanised.ont.fq.gz"
+        return RESULTS / "simulate/reads/metagenome.ont.fq.gz"
+        # return RESULTS / "dehumanise/metagenome.dehumanised.ont.fq.gz"
     elif wildcards.tech == "illumina":
         return [
-            RESULTS / f"dehumanise/metagenome_R{i}.dehumanised.illumina.fq.gz"
+            RESULTS / f"simulate/reads/metagenome_R{i}.illumina.fq.gz"
             for i in [1, 2]
         ]
+        # return [
+        #     RESULTS / f"dehumanise/metagenome_R{i}.dehumanised.illumina.fq.gz"
+        #     for i in [1, 2]
+        # ]
     else:
         raise ValueError(f"Don't recognise tech {wildcards.tech}")
 
