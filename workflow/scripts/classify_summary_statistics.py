@@ -8,6 +8,7 @@ from collections import Counter
 
 DELIM = ","
 SIGFIG = 4
+RSS_SIGFIG = 1
 
 
 def summary(counts: Counter) -> tuple[int, int, int, int, float, float, float]:
@@ -45,7 +46,7 @@ def main():
                 [
                     "tool",
                     "Seconds",
-                    "Max. Memory (MB)",
+                    "Max. Memory (GB)",
                     "FN",
                     "FP",
                     "TN",
@@ -63,6 +64,8 @@ def main():
             df = pd.read_csv(p, sep="\t")
             secs = str(ceil(list(df["s"])[0]))
             rss = str(ceil(list(df["max_rss"])[0]))
+            # convert rss (MB) to GB
+            rss = str(round(int(rss) / 1024, RSS_SIGFIG))
 
             counts = data[tool].get("genus")
             res = list(map(str, summary(counts)))
@@ -75,7 +78,7 @@ def main():
                 [
                     "tool",
                     "Seconds",
-                    "Max. Memory (MB)",
+                    "Max. Memory (GB)",
                     "FN",
                     "FP",
                     "TN",
@@ -93,6 +96,8 @@ def main():
             df = pd.read_csv(p, sep="\t")
             secs = str(ceil(list(df["s"])[0]))
             rss = str(ceil(list(df["max_rss"])[0]))
+            # convert rss (MB) to GB
+            rss = str(round(int(rss) / 1024, RSS_SIGFIG))
 
             counts = data[tool].get("species")
             res = list(map(str, summary(counts)))
@@ -105,7 +110,7 @@ def main():
                 [
                     "tool",
                     "Seconds",
-                    "Max. Memory (MB)",
+                    "Max. Memory (GB)",
                     "FN",
                     "FP",
                     "TN",
@@ -123,6 +128,8 @@ def main():
             df = pd.read_csv(p, sep="\t")
             secs = str(ceil(list(df["s"])[0]))
             rss = str(ceil(list(df["max_rss"])[0]))
+            # convert rss (MB) to GB
+            rss = str(round(int(rss) / 1024, RSS_SIGFIG))
 
             counts = data[tool].get("mtb")
             res = list(map(str, summary(counts)))
@@ -135,7 +142,7 @@ def main():
                 [
                     "tool",
                     "Seconds",
-                    "Max. Memory (MB)",
+                    "Max. Memory (GB)",
                     "FN",
                     "FP",
                     "TN",
@@ -153,6 +160,8 @@ def main():
             df = pd.read_csv(p, sep="\t")
             secs = str(ceil(list(df["s"])[0]))
             rss = str(ceil(list(df["max_rss"])[0]))
+            # convert rss (MB) to GB
+            rss = str(round(int(rss) / 1024, RSS_SIGFIG))
 
             counts = data[tool].get("mtbc")
             res = list(map(str, summary(counts)))

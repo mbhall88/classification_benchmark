@@ -1,13 +1,15 @@
 import sys
 
 sys.stderr = open(snakemake.log[0], "w")
-from pathlib import Path
-import pandas as pd
-from math import ceil
 from collections import Counter
+from math import ceil
+from pathlib import Path
+
+import pandas as pd
 
 DELIM = ","
 SIGFIG = 4
+RSS_SIGFIG = 1
 
 
 def summary(counts: Counter) -> tuple[int, int, int, int, float, float, float]:
@@ -43,7 +45,7 @@ def main():
                 [
                     "tool",
                     "Seconds",
-                    "Max. Memory (MB)",
+                    "Max. Memory (GB)",
                     "FN",
                     "FP",
                     "TN",
@@ -65,6 +67,8 @@ def main():
             df = pd.read_csv(p, sep="\t")
             secs = str(ceil(list(df["s"])[0]))
             rss = str(ceil(list(df["max_rss"])[0]))
+            # convert rss (MB) to GB
+            rss = str(round(int(rss) / 1024, RSS_SIGFIG))
 
             counts = data[tool]
             res = list(map(str, summary(counts)))
