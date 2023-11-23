@@ -6,9 +6,7 @@ kraken_wl_sizes:
 #  - k: 27
 #    l: 18
 
-kraken_db_size:
-  - "full"
-  - "10gb"
+benchmark_repeats: 10
 
 containers:
   kraken: "docker://quay.io/mbhall88/kraken2:84e851b"

@@ -162,7 +162,7 @@ rule minimap2_classify:
     container:
         CONTAINERS["minimap2"]
     benchmark:
-        repeat(BENCH / "classify/minimap2/{db}/{tech}.tsv", 1)
+        repeat(BENCH / "classify/minimap2/{db}/{tech}.tsv", config["benchmark_repeats"])
     params:
         opts="--secondary=no -c",
         preset=lambda wildcards: PRESETS[wildcards.tech],
@@ -198,7 +198,7 @@ rule kraken_classify:
     container:
         CONTAINERS["kraken"]
     benchmark:
-        repeat(BENCH / "classify/kraken/{db}/{tech}.tsv", 1)
+        repeat(BENCH / "classify/kraken/{db}/{tech}.tsv", config["benchmark_repeats"])
     params:
         db=lambda wildcards, input: Path(input.db).parent
         if wildcards.db == "mycobacterium"

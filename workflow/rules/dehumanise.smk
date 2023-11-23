@@ -1,4 +1,4 @@
-REPEAT = 1
+REPEAT = config["benchmark_repeats"]
 
 
 rule sra_human_scrubber:

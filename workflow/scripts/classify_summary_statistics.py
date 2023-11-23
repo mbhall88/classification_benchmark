@@ -1,10 +1,11 @@
 import sys
 
 sys.stderr = open(snakemake.log[0], "w")
-from pathlib import Path
-import pandas as pd
-from math import ceil
 from collections import Counter
+from math import ceil
+from pathlib import Path
+
+import pandas as pd
 
 DELIM = ","
 SIGFIG = 4
@@ -62,10 +63,11 @@ def main():
             tool = ".".join(p.parts[-3:-1])
 
             df = pd.read_csv(p, sep="\t")
-            secs = str(ceil(list(df["s"])[0]))
-            rss = str(ceil(list(df["max_rss"])[0]))
-            # convert rss (MB) to GB
-            rss = str(round(int(rss) / 1024, RSS_SIGFIG))
+            # average the seconds
+            secs = str(ceil(df["s"].mean()))
+
+            # convert rss (MB) to GB and use the maximum of the repeats
+            rss = str(round(df["max_rss"].max() / 1024, RSS_SIGFIG))
 
             counts = data[tool].get("genus")
             res = list(map(str, summary(counts)))
@@ -94,10 +96,10 @@ def main():
             tool = ".".join(p.parts[-3:-1])
 
             df = pd.read_csv(p, sep="\t")
-            secs = str(ceil(list(df["s"])[0]))
-            rss = str(ceil(list(df["max_rss"])[0]))
-            # convert rss (MB) to GB
-            rss = str(round(int(rss) / 1024, RSS_SIGFIG))
+            # average the seconds
+            secs = str(ceil(df["s"].mean()))
+            # convert rss (MB) to GB and use the maximum of the repeats
+            rss = str(round(df["max_rss"].max() / 1024, RSS_SIGFIG))
 
             counts = data[tool].get("species")
             res = list(map(str, summary(counts)))
@@ -126,10 +128,10 @@ def main():
             tool = ".".join(p.parts[-3:-1])
 
             df = pd.read_csv(p, sep="\t")
-            secs = str(ceil(list(df["s"])[0]))
-            rss = str(ceil(list(df["max_rss"])[0]))
-            # convert rss (MB) to GB
-            rss = str(round(int(rss) / 1024, RSS_SIGFIG))
+            # average the seconds
+            secs = str(ceil(df["s"].mean()))
+            # convert rss (MB) to GB and use the maximum of the repeats
+            rss = str(round(df["max_rss"].max() / 1024, RSS_SIGFIG))
 
             counts = data[tool].get("mtb")
             res = list(map(str, summary(counts)))
@@ -158,10 +160,10 @@ def main():
             tool = ".".join(p.parts[-3:-1])
 
             df = pd.read_csv(p, sep="\t")
-            secs = str(ceil(list(df["s"])[0]))
-            rss = str(ceil(list(df["max_rss"])[0]))
-            # convert rss (MB) to GB
-            rss = str(round(int(rss) / 1024, RSS_SIGFIG))
+            # average the seconds
+            secs = str(ceil(df["s"].mean()))
+            # convert rss (MB) to GB and use the maximum of the repeats
+            rss = str(round(df["max_rss"].max() / 1024, RSS_SIGFIG))
 
             counts = data[tool].get("mtbc")
             res = list(map(str, summary(counts)))
