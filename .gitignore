@@ -4,3 +4,8 @@ results/
 tmp/
 workflow/notebooks
 k2_indices
+.cache
+.local
+.wget-hsts
+logs/
+workflow/scripts/make_ktaxonomy.py
