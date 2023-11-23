@@ -1,62 +1,43 @@
-BEST_KLIB = "HPRC"
-
-
-rule extract_dehumanised_ont_reads:
+use rule combine_simulated_reads as extract_dehumanised_ont_reads with:
     input:
-        reads=rules.combine_simulated_reads.output.reads,
-        classification=RESULTS
-        / f"dehumanise/kraken/classify/{BEST_KLIB}/metagenome.ont.k2",
+        fastqs=[
+            RESULTS / f"simulate/reads/{read_type}.ont.fq.gz"
+            for read_type in config["simulate"]["proportions"]
+            if read_type not in ("Unmapped", "Human")
+        ],
     output:
         reads=RESULTS / "dehumanise/metagenome.dehumanised.ont.fq.gz",
     log:
         LOGS / "extract_dehumanised_ont_reads.log",
-    resources:
-        runtime="30m",
-    container:
-        CONTAINERS["seqtk"]
-    shell:
-        """
-        (awk -F'\t' '$1=="U" {{print $2}}' {input.classification} \
-            | seqtk subseq {input.reads} - \
-            | gzip) > {output.reads} 2> {log}
-        """
 
 
-rule extract_dehumanised_illumina_reads:
+use rule combine_illumina_simulated_reads as extract_dehumanised_illumina_reads with:
     input:
-        reads=rules.combine_illumina_simulated_reads.output.r1,
-        reads2=rules.combine_illumina_simulated_reads.output.r2,
-        classification=RESULTS
-        / f"dehumanise/kraken/classify/{BEST_KLIB}/metagenome.illumina.k2",
+        r1s=sorted(
+            [
+                RESULTS / f"simulate/reads/{read_type}_R1.illumina.fq.gz"
+                for read_type in config["simulate"]["proportions"]
+                if read_type not in ("Unmapped", "Human")
+            ]
+        ),
+        r2s=sorted(
+            [
+                RESULTS / f"simulate/reads/{read_type}_R2.illumina.fq.gz"
+                for read_type in config["simulate"]["proportions"]
+                if read_type not in ("Unmapped", "Human")
+            ]
+        ),
     output:
-        reads=RESULTS / "dehumanise/metagenome_R1.dehumanised.illumina.fq.gz",
-        reads2=RESULTS / "dehumanise/metagenome_R2.dehumanised.illumina.fq.gz",
+        r1=RESULTS / "dehumanise/metagenome_R1.dehumanised.illumina.fq.gz",
+        r2=RESULTS / "dehumanise/metagenome_R2.dehumanised.illumina.fq.gz",
     log:
-        LOGS / "extract_dehumanised_illumina_reads.log",
-    resources:
-        runtime="30m",
-    container:
-        CONTAINERS["seqtk"]
-    shell:
-        """
-        (awk -F'\t' '$1=="U" {{print $2"/1"}}' {input.classification} \
-            | seqtk subseq {input.reads} - \
-            | gzip) > {output.reads} 2> {log}
-        (awk -F'\t' '$1=="U" {{print $2"/2"}}' {input.classification} \
-            | seqtk subseq {input.reads2} - \
-            | gzip) > {output.reads2} 2>> {log}
-        """
+        LOGS / "extract_dehumanised_illumina_reads.log"
 
 
 def infer_classify_reads(wildcards):
     if wildcards.tech == "ont":
-        # return RESULTS / "simulate/reads/metagenome.ont.fq.gz"
         return RESULTS / "dehumanise/metagenome.dehumanised.ont.fq.gz"
     elif wildcards.tech == "illumina":
-        # return [
-        #     RESULTS / f"simulate/reads/metagenome_R{i}.illumina.fq.gz"
-        #     for i in [1, 2]
-        # ]
         return [
             RESULTS / f"dehumanise/metagenome_R{i}.dehumanised.illumina.fq.gz"
             for i in [1, 2]
