@@ -1,3 +1,5 @@
+REPEAT = config["benchmark_repeats"]
+
 use rule combine_simulated_reads as extract_dehumanised_ont_reads with:
     input:
         fastqs=[
@@ -5,6 +7,7 @@ use rule combine_simulated_reads as extract_dehumanised_ont_reads with:
             for read_type in config["simulate"]["proportions"]
             if read_type not in ("Unmapped", "Human")
         ],
+        script=SCRIPTS / "filter_ambig.py",
     output:
         reads=RESULTS / "dehumanise/metagenome.dehumanised.ont.fq.gz",
     log:
@@ -27,6 +30,7 @@ use rule combine_illumina_simulated_reads as extract_dehumanised_illumina_reads 
                 if read_type not in ("Unmapped", "Human")
             ]
         ),
+        script=SCRIPTS / "filter_ambig.py",
     output:
         r1=RESULTS / "dehumanise/metagenome_R1.dehumanised.illumina.fq.gz",
         r2=RESULTS / "dehumanise/metagenome_R2.dehumanised.illumina.fq.gz",
@@ -156,13 +160,13 @@ rule minimap2_classify:
     log:
         LOGS / "minimap2_classify/{db}/{tech}.log",
     resources:
-        runtime="2h",
+        runtime=f"{2 * REPEAT}h",
         mem_mb=int(20 * GB),
     threads: 4
     container:
         CONTAINERS["minimap2"]
     benchmark:
-        repeat(BENCH / "classify/minimap2/{db}/{tech}.tsv", config["benchmark_repeats"])
+        repeat(BENCH / "classify/minimap2/{db}/{tech}.tsv", REPEAT)
     params:
         opts="--secondary=no -c",
         preset=lambda wildcards: PRESETS[wildcards.tech],
@@ -191,14 +195,14 @@ rule kraken_classify:
         LOGS / "kraken_classify/{db}/{tech}.log",
     threads: 4
     resources:
-        runtime="20m",
+        runtime=f"{20 * REPEAT}m",
         mem_mb=lambda wildcards: int(80 * GB)
         if wildcards.db == "standard"
         else int(12 * GB),
     container:
         CONTAINERS["kraken"]
     benchmark:
-        repeat(BENCH / "classify/kraken/{db}/{tech}.tsv", config["benchmark_repeats"])
+        repeat(BENCH / "classify/kraken/{db}/{tech}.tsv", REPEAT)
     params:
         db=lambda wildcards, input: Path(input.db).parent
         if wildcards.db == "mycobacterium"
