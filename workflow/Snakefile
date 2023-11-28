@@ -31,6 +31,9 @@ for tech in ["illumina", "ont"]:
         target_files.add(RESULTS / f"classify/summary.{c}.{tech}.csv")
 
 
+target_files.add(RESULTS / "pod5/NA19318/pod5/")
+target_files.add(RESULTS / "pod5/HG03611/pod5/")
+
 localrules:
     all,
 
@@ -45,3 +48,4 @@ include: RULES / "simulate.smk"
 include: RULES / "dehumanise.smk"
 include: RULES / "classify.smk"
 include: RULES / "assess.smk"
+include: RULES / "real.smk"

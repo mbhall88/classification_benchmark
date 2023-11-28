@@ -1,0 +1,11 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.10
+  - curl=8
+  - csvtk=0.25
+  - fd-find=8
+  - pip
+  - pip:
+    - pod5==0.3.1

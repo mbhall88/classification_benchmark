@@ -45,3 +45,49 @@ simulate:
     Bacteria: 0.41
     NTM: 0.01
     MTBC: 0.05
+
+# ========== REAL DATA METADATA ==========
+
+# HG00277
+# Finnish
+
+# ONT reads: https://s3.amazonaws.com/1000g-ont/100_PLUS/unaligned_bams/HG00277.LSK114.R10.dorado034.sup.5mCG_5hmCG.all.unaligned.bam
+# Illumina: ERR3241786  NovaSeq 6000
+
+# HG04054
+# Indian Telugu in the UK
+
+# ONT reads: https://s3.amazonaws.com/1000g-ont/UltraLong/unaligned_bams/HG04054.ULK114.R10.dorado034.sup.5mCG_5hmCG.all.unaligned.notPhased.bam
+# Illumina: ERR3243120  NovaSeq 6000
+
+# NA19318
+# Luhya, Kenya
+
+# POD5: https://s3.amazonaws.com/1000g-ont/pod5_data/GM19318-ONT-WGS-LSK114-01.tar 681GB
+# https://s3.amazonaws.com/1000g-ont/pod5_data/GM19318-ONT-WGS-LSK114-02.tar 539GB
+# https://s3.amazonaws.com/1000g-ont/pod5_data/GM19318-ONT-WGS-LSK114-03.tar 502GB
+# Illumina: ERR3239713 NovaSeq 6000
+
+# HG03611
+# Bengali, Bangladesh
+
+# POD5: https://s3.amazonaws.com/1000g-ont/pod5_data/NU_HG03611_ONT-WGS-ULK114.tar 896.3
+# Illumina: ERR3243073 NovaSeq 6000
+
+real_data:
+  mtb:  # https://doi.org/10.1093/bib/bbac256
+    ont: ERR8170871  # sample S3 R10.3
+    illumina: ERR245682  # sample S3 HiSeq 4000
+  metagenomic:  # https://www.nature.com/articles/s41592-022-01539-7
+    ont: ERS8296814  # zymo mock community ZymoBIOMICS HMW DNA Standard (D6322) R10.4
+    illumina: ERS8296812  # MiSeq
+  human:
+    HG00277:  # Finnish
+      ont: "https://s3.amazonaws.com/1000g-ont/100_PLUS/unaligned_bams/HG00277.LSK114.R10.dorado034.sup.5mCG_5hmCG.all.unaligned.bam"
+      illumina: ERR3241786
+    NA19318:  # Luhya, Kenya
+      ont: "https://s3.amazonaws.com/1000g-ont/pod5_data/GM19318-ONT-WGS-LSK114-01.tar"
+      illumina: ERR3239713
+    HG03611:  # Bengali, Bangladesh
+      ont: "https://s3.amazonaws.com/1000g-ont/pod5_data/NU_HG03611_ONT-WGS-ULK114.tar"
+      illumina: ERR3243073
