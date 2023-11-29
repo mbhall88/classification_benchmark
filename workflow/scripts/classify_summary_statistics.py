@@ -31,6 +31,32 @@ def confidence_interval(n_s: int, n_f: int, conf: float = 0.95) -> tuple[float, 
     return A - CI, A + CI
 
 
+def f_score_interval(
+    tps: int, fps: int, fns: int, conf: float = 0.95
+) -> tuple[float, float]:
+    """Calculate the Wilson score interval for the F-score.
+    tps: Number of true positives
+    fps: Number of false positives
+    fns: Number of false negatives
+    conf: the confidence level. i.e. 0.95 is 95% confidence
+    """
+    precision_lwr_bound, precision_upr_bound = confidence_interval(n_s=tps, n_f=fps)
+    recall_lwr_bound, recall_upr_bound = confidence_interval(n_s=tps, n_f=fns)
+
+    f1_lwr_bound = (
+        2
+        * (precision_lwr_bound * recall_lwr_bound)
+        / (precision_lwr_bound + recall_lwr_bound)
+    )
+    f1_upr_bound = (
+        2
+        * (precision_upr_bound * recall_upr_bound)
+        / (precision_upr_bound + recall_upr_bound)
+    )
+
+    return f1_lwr_bound, f1_upr_bound
+
+
 def summary(counts: Counter) -> tuple[int, int, int, int, float, float, float]:
     fns = counts["FN"]
     tps = counts["TP"]
@@ -46,7 +72,7 @@ def summary(counts: Counter) -> tuple[int, int, int, int, float, float, float]:
     sn_lwr_bound = round(sn_lwr_bound, SIGFIG)
     sn_upr_bound = round(sn_upr_bound, SIGFIG)
     f1 = round((2 * tps) / ((2 * tps) + fps + fns), SIGFIG)
-    f1_lwr_bound, f1_upr_bound = confidence_interval(n_s=tps, n_f=fps + fns)
+    f1_lwr_bound, f1_upr_bound = f_score_interval(n_s=tps, n_f=fps + fns)
     f1_lwr_bound = round(f1_lwr_bound, SIGFIG)
     f1_upr_bound = round(f1_upr_bound, SIGFIG)
 

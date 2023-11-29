@@ -211,9 +211,17 @@ def main():
 
                 truth_taxid = read_tax["species_id"]
 
+                if not truth_taxid:  # is probably a virus
+                    genus_name = read_tax["genus"]
+                    print(
+                        f"WARN: {read_id} has no species ID, but has genus {genus_name}",
+                        file=sys.stderr,
+                    )
+                    truth_taxid = read_tax["genus_id"]
+
                 called_taxid = acc2taxid.get(record.tname, {}).get("species_id", "0")
 
-                if not truth_taxid and snakemake.params.ignore_unmapped:
+                if not truth_taxid:
                     genus_clf = NA
                     species_clf = NA
                     mtb_clf = NA
