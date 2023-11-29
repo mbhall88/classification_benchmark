@@ -1,16 +1,16 @@
 import sys
 from dataclasses import dataclass
 from functools import cache
-from typing import Optional, List
+from typing import List, Optional
 
 sys.stderr = open(snakemake.log[0], "w")
 
-from pathlib import Path
 import csv
-from taxonomy import Taxonomy, TaxonomyError
+from pathlib import Path
+
 from Bio import Entrez
 from pafpy import PafFile
-
+from taxonomy import Taxonomy, TaxonomyError
 
 Entrez.email = "michael.hall2@unimelb.edu.au"
 DELIM = "\t"
@@ -195,9 +195,6 @@ def main():
 
         with PafFile(snakemake.input.aln) as paf:
             for record in paf:
-                if not record.is_primary():
-                    continue
-
                 read_id = record.qname
                 if is_illumina:
                     read_id = read_id[:-2]
@@ -212,6 +209,7 @@ def main():
                     raise KeyError(f"{read_id} not in truth")
 
                 truth_taxid = read_tax["species_id"]
+
                 called_taxid = acc2taxid.get(record.tname, {}).get("species_id", "0")
 
                 if not truth_taxid and snakemake.params.ignore_unmapped:
@@ -287,6 +285,16 @@ def main():
                             )
                     assert len(updated_clfs) == len(new_clfs), record
                     clfs[read_id] = updated_clfs
+
+        # make sure all read ids in truth have been classified, if not, print all missing read ids to stderr
+        missing_read_ids = set(truth.keys()) - set(clfs.keys())
+        if missing_read_ids:
+            print(
+                f"WARNING: {len(missing_read_ids)} read ids were not classified. They are:",
+                file=sys.stderr,
+            )
+            for read_id in missing_read_ids:
+                print(read_id, file=sys.stderr)
 
         for read_id, entires in clfs.items():
             if is_illumina:

@@ -296,7 +296,7 @@ rule minimap2_mycobacterium_classification:
     conda:
         ENVS / "minimap2_mycobacterium_classification.yaml"
     params:
-        ignore_unmapped=True,
+        ignore_unmapped=False,
     script:
         SCRIPTS / "minimap2_mycobacterium_classification.py"
 

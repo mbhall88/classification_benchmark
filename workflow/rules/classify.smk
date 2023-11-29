@@ -168,7 +168,7 @@ rule minimap2_classify:
     benchmark:
         repeat(BENCH / "classify/minimap2/{db}/{tech}.tsv", REPEAT)
     params:
-        opts="--secondary=no -c",
+        opts="--secondary=no -c --paf-no-hit",
         preset=lambda wildcards: PRESETS[wildcards.tech],
     shell:
         """
