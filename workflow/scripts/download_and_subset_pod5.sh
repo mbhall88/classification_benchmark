@@ -1,3 +1,5 @@
+set -euo pipefail
+
 exec 2> "${snakemake_log[0]}"
 
 URL="${snakemake_params[url]}"
@@ -12,7 +14,7 @@ cd $tmpdir || exit 1
 
 echo "Downloading pod5 files from $URL..." >&2
 
-curl -L --retry 10 --retry-delay 60 "$URL" | tar -xz
+curl -L --retry 10 --retry-delay 60 "$URL" | tar -xf -
 
 echo "Download complete. Subsetting $N_READS reads..." >&2
 
