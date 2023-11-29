@@ -3,7 +3,7 @@ channels:
   - bioconda
 dependencies:
   - python=3.10
-  - curl=8
+  - aria2=1.37
   - csvtk=0.25
   - fd-find=8
   - pip
