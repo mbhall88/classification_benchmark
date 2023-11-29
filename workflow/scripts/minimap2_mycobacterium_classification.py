@@ -32,6 +32,7 @@ COLUMNS = [
 MTB_TAXID = "1773"
 UNCLASSIFIED = "0"
 MTBC_TAXID = "77643"
+HUMAN_SPECIES_ID = "9606"
 MYCO_TAXIDS = {
     "1763",  # Mycobacterium
     "670516",  # Mycobacteroides
@@ -286,8 +287,14 @@ def main():
                     assert len(updated_clfs) == len(new_clfs), record
                     clfs[read_id] = updated_clfs
 
+        non_human_read_ids = set()
+        for rid, read_tax in truth.items():
+            taxid = read_tax["species_id"]
+            if taxid != HUMAN_SPECIES_ID:
+                non_human_read_ids.add(rid)
+
         # make sure all read ids in truth have been classified, if not, print all missing read ids to stderr
-        missing_read_ids = set(truth.keys()) - set(clfs.keys())
+        missing_read_ids = non_human_read_ids - set(clfs.keys())
         if missing_read_ids:
             print(
                 f"WARNING: {len(missing_read_ids)} read ids were not classified. They are:",
