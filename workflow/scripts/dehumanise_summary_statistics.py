@@ -80,7 +80,7 @@ def main():
             DELIM.join(
                 [
                     "tool",
-                    "Seconds",
+                    "Rate (reads/sec)",
                     "Max. Memory (GB)",
                     "FN",
                     "FP",
@@ -109,7 +109,8 @@ def main():
             df = pd.read_csv(p, sep="\t")
 
             # average the seconds
-            secs = str(ceil(df["s"].mean()))
+            secs = df["s"].mean()
+            rate = str(ceil(n_reads / secs))
 
             # convert rss (MB) to GB and use the maximum of the repeats
             rss = str(round(df["max_rss"].max() / 1024, RSS_SIGFIG))
@@ -122,7 +123,7 @@ def main():
                     res.extend(map(str, i))
                 else:
                     res.append(str(i))
-            print(DELIM.join([tool, secs, rss, *res]), file=fd_out)
+            print(DELIM.join([tool, rate, rss, *res]), file=fd_out)
 
 
 main()

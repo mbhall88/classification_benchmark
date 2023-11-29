@@ -63,9 +63,15 @@ def summary(counts: Counter) -> tuple[int, int, int, int, float, float, float]:
 
 def main():
     data = {}
+    n_reads = None
     for p in map(Path, snakemake.input.classifications):
         tool = ".".join(p.name.split(".")[1:3])
         df = pd.read_csv(p, sep="\t")
+
+        if n_reads is None:
+            n_reads = len(df)
+        else:
+            assert len(df) == n_reads, f"different number of reads in {tool}"
 
         genus_counts = Counter(df["genus_classification"])
         species_counts = Counter(df["species_classification"])
@@ -82,7 +88,7 @@ def main():
             DELIM.join(
                 [
                     "tool",
-                    "Seconds",
+                    "Rate (reads/sec)",
                     "Max. Memory (GB)",
                     "FN",
                     "FP",
@@ -106,7 +112,8 @@ def main():
 
             df = pd.read_csv(p, sep="\t")
             # average the seconds
-            secs = str(ceil(df["s"].mean()))
+            secs = df["s"].mean()
+            rate = str(ceil(n_reads / secs))
 
             # convert rss (MB) to GB and use the maximum of the repeats
             rss = str(round(df["max_rss"].max() / 1024, RSS_SIGFIG))
@@ -118,7 +125,7 @@ def main():
                     res.extend(map(str, i))
                 else:
                     res.append(str(i))
-            print(DELIM.join([tool, secs, rss, *res]), file=fd_out)
+            print(DELIM.join([tool, rate, rss, *res]), file=fd_out)
 
     # Species summary
     with open(snakemake.output.species_summary, "w") as fd_out:
@@ -126,7 +133,7 @@ def main():
             DELIM.join(
                 [
                     "tool",
-                    "Seconds",
+                    "Rate (reads/sec)",
                     "Max. Memory (GB)",
                     "FN",
                     "FP",
@@ -150,7 +157,8 @@ def main():
 
             df = pd.read_csv(p, sep="\t")
             # average the seconds
-            secs = str(ceil(df["s"].mean()))
+            secs = df["s"].mean()
+            rate = str(ceil(n_reads / secs))
             # convert rss (MB) to GB and use the maximum of the repeats
             rss = str(round(df["max_rss"].max() / 1024, RSS_SIGFIG))
 
@@ -161,7 +169,7 @@ def main():
                     res.extend(map(str, i))
                 else:
                     res.append(str(i))
-            print(DELIM.join([tool, secs, rss, *res]), file=fd_out)
+            print(DELIM.join([tool, rate, rss, *res]), file=fd_out)
 
     # MTB summary
     with open(snakemake.output.mtb_summary, "w") as fd_out:
@@ -169,7 +177,7 @@ def main():
             DELIM.join(
                 [
                     "tool",
-                    "Seconds",
+                    "Rate (reads/sec)",
                     "Max. Memory (GB)",
                     "FN",
                     "FP",
@@ -193,7 +201,8 @@ def main():
 
             df = pd.read_csv(p, sep="\t")
             # average the seconds
-            secs = str(ceil(df["s"].mean()))
+            secs = df["s"].mean()
+            rate = str(ceil(n_reads / secs))
             # convert rss (MB) to GB and use the maximum of the repeats
             rss = str(round(df["max_rss"].max() / 1024, RSS_SIGFIG))
 
@@ -204,7 +213,7 @@ def main():
                     res.extend(map(str, i))
                 else:
                     res.append(str(i))
-            print(DELIM.join([tool, secs, rss, *res]), file=fd_out)
+            print(DELIM.join([tool, rate, rss, *res]), file=fd_out)
 
     # MTBC summary
     with open(snakemake.output.mtbc_summary, "w") as fd_out:
@@ -212,7 +221,7 @@ def main():
             DELIM.join(
                 [
                     "tool",
-                    "Seconds",
+                    "Rate (reads/sec)",
                     "Max. Memory (GB)",
                     "FN",
                     "FP",
@@ -236,7 +245,8 @@ def main():
 
             df = pd.read_csv(p, sep="\t")
             # average the seconds
-            secs = str(ceil(df["s"].mean()))
+            secs = df["s"].mean()
+            rate = str(ceil(n_reads / secs))
             # convert rss (MB) to GB and use the maximum of the repeats
             rss = str(round(df["max_rss"].max() / 1024, RSS_SIGFIG))
 
@@ -247,7 +257,7 @@ def main():
                     res.extend(map(str, i))
                 else:
                     res.append(str(i))
-            print(DELIM.join([tool, secs, rss, *res]), file=fd_out)
+            print(DELIM.join([tool, rate, rss, *res]), file=fd_out)
 
 
 main()
