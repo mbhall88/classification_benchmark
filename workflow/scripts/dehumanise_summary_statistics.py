@@ -11,6 +11,10 @@ from scipy import stats
 DELIM = ","
 SIGFIG = 4
 RSS_SIGFIG = 1
+TOOL_NAMES = {
+    "sra": "HRRT",
+    "hostile": "Hostile",
+}
 
 
 def confidence_interval(n_s: int, n_f: int, conf: float = 0.95) -> tuple[float, float]:
@@ -71,6 +75,7 @@ def summary(counts: Counter) -> tuple[int, int, int, int, float, float, float]:
     sn_lwr_bound, sn_upr_bound = confidence_interval(n_s=tps, n_f=fns)
     sn_lwr_bound = round(sn_lwr_bound, SIGFIG)
     sn_upr_bound = round(sn_upr_bound, SIGFIG)
+    f1 = round((2 * tps) / ((2 * tps) + fps + fns), SIGFIG)
     f1_lwr_bound, f1_upr_bound = f_score_interval(tps=tps, fps=fps, fns=fns)
     f1_lwr_bound = round(f1_lwr_bound, SIGFIG)
     f1_upr_bound = round(f1_upr_bound, SIGFIG)
@@ -91,6 +96,10 @@ def main():
     n_reads = None
     for p in map(Path, snakemake.input.classifications):
         tool = p.name.split(".", maxsplit=1)[1].rsplit(".", maxsplit=2)[0]
+        if tool in TOOL_NAMES:
+            tool = TOOL_NAMES[tool]
+        else:
+            tool = tool.replace(".", " ")
         df = pd.read_csv(p, sep="\t")
         if n_reads is None:
             n_reads = len(df)
@@ -104,22 +113,16 @@ def main():
         print(
             DELIM.join(
                 [
-                    "tool",
+                    "Method",
                     "Rate (reads/sec)",
-                    "Max. Memory (GB)",
+                    "Peak Memory (GB)",
                     "FN",
                     "FP",
                     "TN",
                     "TP",
-                    "Recall",
-                    "Recall Lower Bound",
-                    "Recall Upper Bound",
-                    "Precision",
-                    "Precision Lower Bound",
-                    "Precision Upper Bound",
-                    "F-score",
-                    "F-score Lower Bound",
-                    "F-score Upper Bound",
+                    "Recall (95% CI)",
+                    "Precision (95% CI)",
+                    "F-score (95% CI)",
                 ]
             ),
             file=fd_out,
@@ -130,6 +133,10 @@ def main():
                 tool = f"kraken.{suf}"
             else:
                 tool = p.parts[-2]
+            if tool in TOOL_NAMES:
+                tool = TOOL_NAMES[tool]
+            else:
+                tool = tool.replace(".", " ")
 
             df = pd.read_csv(p, sep="\t")
 
@@ -145,7 +152,7 @@ def main():
             res = []
             for i in summary(counts):
                 if isinstance(i, tuple):
-                    res.extend(map(str, i))
+                    res.append(f"{i[0]} ({i[1]}-{i[2]})")
                 else:
                     res.append(str(i))
             print(DELIM.join([tool, rate, rss, *res]), file=fd_out)
