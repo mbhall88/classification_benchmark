@@ -37,6 +37,8 @@ The method we found to give the best balance of runtime, memory usage, and preci
 recall was kraken2 with a database built from the Human Pangenome Reference Consortium
 genomes.
 
+This example has been wrapped into a standalone tool called [`nohuman`](https://github.com/mbhall88/nohuman/) which takes a fastq as input and returns a fastq with human reads removed.
+
 #### Download human database
 
 ```
