@@ -233,6 +233,7 @@ rule dehumanise_summary_statistics:
         LOGS / "dehumanise_summary_statistics/{tech}.log",
     resources:
         runtime="5m",
+        mem_mb=int(4 * GB),
     conda:
         ENVS / "datasci.yaml"
     script:

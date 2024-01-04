@@ -1,0 +1,7 @@
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - seqkit=2.6
+  - fastq-dl=2.0.4
+  - rasusa=0.7

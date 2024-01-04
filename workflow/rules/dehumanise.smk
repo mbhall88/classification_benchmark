@@ -12,7 +12,7 @@ rule sra_human_scrubber:
     threads: 4
     resources:
         mem_mb=lambda wildcards, attempt: attempt * int(4 * GB),
-        runtime=f"{1 * REPEAT}h",
+        runtime=f"{4 * REPEAT}h",
     benchmark:
         repeat(BENCH / "dehumanise/sra/ont.tsv", REPEAT)
     container:
@@ -47,7 +47,7 @@ rule sra_human_scrubber_illumina:
     threads: 4
     resources:
         mem_mb=lambda wildcards, attempt: attempt * int(4 * GB),
-        runtime=f"{1 * REPEAT}h",
+        runtime=f"{4 * REPEAT}h",
     benchmark:
         repeat(BENCH / "dehumanise/sra/illumina.tsv", REPEAT)
     container:
@@ -84,8 +84,8 @@ rule minimap2_human_scrubber:
         LOGS / "minimap2_human_scrubber.log",
     threads: 4
     resources:
-        mem_mb=lambda wildcards, attempt: attempt * int(12 * GB),
-        runtime=f"{30 * REPEAT}m",
+        mem_mb=lambda wildcards, attempt: attempt * int(32 * GB),
+        runtime=f"{1 * REPEAT}h",
     benchmark:
         repeat(BENCH / "dehumanise/minimap2/ont.tsv", REPEAT)
     container:
@@ -107,8 +107,8 @@ rule minimap2_human_scrubber_illumina:
         LOGS / "minimap2_human_scrubber_illumina.log",
     threads: 4
     resources:
-        mem_mb=lambda wildcards, attempt: attempt * int(12 * GB),
-        runtime=f"{30 * REPEAT}m",
+        mem_mb=lambda wildcards, attempt: attempt * int(32 * GB),
+        runtime=f"{1 * REPEAT}h",
     benchmark:
         repeat(BENCH / "dehumanise/minimap2/illumina.tsv", REPEAT)
     container:
@@ -118,14 +118,6 @@ rule minimap2_human_scrubber_illumina:
     shell:
         "minimap2 {params.opts} -t {threads} -o {output.aln} {input.index} {input.r1} {input.r2} 2> {log}"
 
-
-def infer_kraken_db(wildcards):
-    if wildcards.lib == "default":
-        return RESULTS / "dehumanise/kraken/db/k35/l31/db"
-    elif wildcards.lib == "HPRC":
-        return RESULTS / "db/HPRC/kraken/db"
-    else:
-        raise NotImplementedError(f"Kraken lib {wildcards.lib} not known")
 
 rule kraken_human_classify:
     input:
@@ -192,8 +184,8 @@ rule miniwinnow_human_scrubber:
         LOGS / "miniwinnow_human_scrubber.log",
     threads: 4
     resources:
-        mem_mb=lambda wildcards, attempt: attempt * int(16 * GB),
-        runtime=f"{30 * REPEAT}m",
+        mem_mb=lambda wildcards, attempt: attempt * int(32 * GB),
+        runtime=f"{1 * REPEAT}h",
     benchmark:
         repeat(BENCH / "dehumanise/miniwinnow/ont.tsv", REPEAT)
     conda:
@@ -221,7 +213,7 @@ rule hostile_human_scrubber:
     log:
         LOGS / "hostile_human_scrubber.log",
     resources:
-        mem_mb=int(14 * GB),
+        mem_mb=int(30 * GB),
         runtime=f"{1 * REPEAT}h",
     threads: 4
     shadow:
@@ -247,7 +239,7 @@ rule hostile_human_scrubber_illumina:
     log:
         LOGS / "hostile_human_scrubber_illumina.log",
     resources:
-        mem_mb=int(14 * GB),
+        mem_mb=int(30 * GB),
         runtime=f"{1 * REPEAT}h",
     threads: 4
     shadow:

@@ -38,18 +38,6 @@ use rule combine_illumina_simulated_reads as extract_dehumanised_illumina_reads 
         LOGS / "extract_dehumanised_illumina_reads.log"
 
 
-def infer_classify_reads(wildcards):
-    if wildcards.tech == "ont":
-        return RESULTS / "dehumanise/metagenome.dehumanised.ont.fq.gz"
-    elif wildcards.tech == "illumina":
-        return [
-            RESULTS / f"dehumanise/metagenome_R{i}.dehumanised.illumina.fq.gz"
-            for i in [1, 2]
-        ]
-    else:
-        raise ValueError(f"Don't recognise tech {wildcards.tech}")
-
-
 rule remove_held_out_assemblies_clockwork:
     input:
         db=rules.faidx_db.output.fasta,
@@ -136,21 +124,6 @@ rule index_heldout_mycobacterium_db_minimap2:
         "minimap2 {params.opts} -t {threads} -d {output.index} {input.fasta} 2> {log}"
 
 
-def infer_minimap2_db(wildcards):
-    preset = PRESETS[wildcards.tech]
-    if wildcards.db == "clockwork":
-        return RESULTS / f"classify/minimap2/db/db.{preset}.mmi"
-    elif wildcards.db == "mtbc":
-        return RESULTS / f"db/GTDB_genus_Mycobacterium/MTB.{preset}.mmi"
-    elif wildcards.db == "mycobacterium":
-        return RESULTS / f"classify/minimap2/db/Mycobacterium.rep.{preset}.mmi"
-    else:
-        raise ValueError(f"Don't recognise db {wildcards.db}")
-
-
-PRESETS = {"ont": "map-ont", "illumina": "sr"}
-
-
 rule minimap2_classify:
     input:
         reads=infer_classify_reads,
@@ -175,13 +148,6 @@ rule minimap2_classify:
         minimap2 {params.opts} -x {params.preset} -o {output.aln} -t {threads} \
             {input.db} {input.reads} 2> {log}
         """
-
-
-CLASSIFY_DBS = {
-    "standard": RESULTS / "db/kraken/standard",
-    "standard-8": RESULTS / "db/kraken/standard-8",
-    "mycobacterium": RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/hash.k2d",
-}
 
 
 rule kraken_classify:
