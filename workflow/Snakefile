@@ -30,6 +30,8 @@ for tech in ["illumina", "ont"]:
     target_files.add(RESULTS / f"dehumanise/summary.{tech}.csv")
     target_files.add(RESULTS / f"real/dehumanise/summary.{tech}.csv")
     target_files.add(RESULTS / f"real/classify/summary.mtb.{tech}.csv")
+    target_files.add(RESULTS / f"real/coverage/relative_change/{tech}.csv")
+    target_files.add(RESULTS / f"coverage/relative_change/{tech}.csv")
     for c in ["genus", "species", "mtb", "mtbc"]:
         target_files.add(RESULTS / f"classify/summary.{c}.{tech}.csv")
 
@@ -50,3 +52,4 @@ include: RULES / "dehumanise.smk"
 include: RULES / "classify.smk"
 include: RULES / "assess.smk"
 include: RULES / "real.smk"
+include: RULES / "coverage.smk"

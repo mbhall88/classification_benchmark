@@ -5,6 +5,7 @@ CLASSIFY_DBS = {
     "mycobacterium": RESULTS / "db/GTDB_genus_Mycobacterium/kraken/db/hash.k2d",
 }
 
+
 def infer_kraken_db(wildcards):
     if wildcards.lib == "default":
         return RESULTS / "dehumanise/kraken/db/k35/l31/db"
@@ -57,3 +58,29 @@ def infer_classify_real_reads(wildcards):
         return [RESULTS / f"real/reads/nonhuman_{i}.illumina.fq.gz" for i in [1, 2]]
     else:
         raise ValueError(f"Don't recognise tech {wildcards.tech}")
+
+
+def infer_coverage_postclassifications_simulations(wildcards):
+    clfs = []
+    tech = wildcards.tech
+    for db in ["standard", "standard-8", "mycobacterium"]:
+        clfs.append(RESULTS / f"coverage/postclassification/{tech}/kraken/{db}.tsv")
+    for db in ["clockwork", "mtbc", "mycobacterium"]:
+        clfs.append(RESULTS / f"coverage/postclassification/{tech}/minimap2/{db}.tsv")
+
+    return clfs
+
+
+def infer_coverage_postclassifications_real(wildcards):
+    clfs = []
+    tech = wildcards.tech
+    for db in ["standard", "standard-8", "mycobacterium"]:
+        clfs.append(
+            RESULTS / f"real/coverage/postclassification/{tech}/kraken/{db}.tsv"
+        )
+    for db in ["clockwork", "mtbc", "mycobacterium"]:
+        clfs.append(
+            RESULTS / f"real/coverage/postclassification/{tech}/minimap2/{db}.tsv"
+        )
+
+    return clfs
