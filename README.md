@@ -11,20 +11,21 @@ files.
 
 Custom databases have all been uploaded to Zenodo, along with the simulated reads:
 
-- Nanopore simulated metagenomic reads - https://doi.org/10.5281/zenodo.8339788
-- Illumina simulated metagenomic reads - https://doi.org/10.5281/zenodo.8339790
+- Nanopore simulated metagenomic reads - <https://doi.org/10.5281/zenodo.8339788>
+- Illumina simulated metagenomic reads - <https://doi.org/10.5281/zenodo.8339790>
+- Nanopore and Illumina artificial real reads - <https://doi.org/10.5281/zenodo.10472796>
 - Kraken2 database built from the Human Pangenome Reference Consortium
-  genomes - https://doi.org/10.5281/zenodo.8339731
+  genomes - <https://doi.org/10.5281/zenodo.8339731>
 - Kraken2 database built from the kraken2 Human
-  library - https://doi.org/10.5281/zenodo.8339699
+  library - <https://doi.org/10.5281/zenodo.8339699>
 - Kraken2 database built from a *Mycobacterium* representative set of
-  genomes - https://doi.org/10.5281/zenodo.8339821
+  genomes - <https://doi.org/10.5281/zenodo.8339821>
 - A (fasta) database of representative genomes from the *Mycobacterium*
-  genus - https://doi.org/10.5281/zenodo.8339940
+  genus - <https://doi.org/10.5281/zenodo.8339940>
 - A (fasta) database of *M. tuberculosis* genomes from a variety of
-  lineages - https://doi.org/10.5281/zenodo.8339947
+  lineages - <https://doi.org/10.5281/zenodo.8339947>
 - The fasta file built from the [Clockwork](https://github.com/iqbal-lab-org/clockwork)
-  decontamination pipeline - https://doi.org/10.5281/zenodo.8339802
+  decontamination pipeline - <https://doi.org/10.5281/zenodo.8339802>
 
 ## Example usage
 
