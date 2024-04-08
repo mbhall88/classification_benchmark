@@ -1,6 +1,6 @@
-# Pangenome databases provide superior host removal and mycobacteria classification from clinical metagenomic data
+# Pangenome databases improve host removal and mycobacteria classification from clinical metagenomic data
 
-> Hall, M, Coin, L., Pangenome databases provide superior host removal and mycobacteria classification from clinical metagenomic data. bioRxiv 2023. doi: [10.1101/2023.09.18.558339][doi]
+> Hall, Michael B., and Lachlan J. M. Coin. “Pangenome databases improve host removal and mycobacteria classification from clinical metagenomic data” GigaScience, April 4, 2024. <https://doi.org/10.1093/gigascience/giae010>
 
 Benchmarking different ways of doing read (taxonomic) classification, with a focus on
 removal of contamination and classification of _M. tuberculosis_ reads.
@@ -154,4 +154,4 @@ python extract_kraken_reads.py -k classifications.myco.tsv -1 reads.depleted.fq 
 python extract_kraken_reads.py -k classifications.myco.tsv -1 reads_1.depleted.fq -2 reads_2.depleted.fq -o reads_1.enriched.fq -o2 reads_2.enriched.fq -t 1773 -r myco.kreport --include-children
 ```
 
-[doi]: https://doi.org/10.1101/2023.09.18.558339 
+[doi]: https://doi.org/10.1093/gigascience/giae010 
